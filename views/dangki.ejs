@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <!-- <Header> -->
+      <!-- <End of Header> -->
+    
+      <body>
+          <!-- Navnar -->
+          <!-- End of Navnar -->
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <h1> <%= status %> </h1>
+    <form method="POST" action="/dangki">
+      <div class="form-group">
+        <label for="">User name</label>
+        <input type="text" name="usr" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter usr">
+        <label for="">Password</label>
+        <input type="password" name="pass" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter pass">
+        <label for="">Phone</label>
+        <input type="number" name="phone" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter pass">
+        <label for="">Role</label>
+          <select class="form-control" name="role" id="sel1">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+            
+          </select>
+      </div>
+     
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </body>
+</html>
