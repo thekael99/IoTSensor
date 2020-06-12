@@ -148,7 +148,46 @@ router.get('/apimotor', function (req, res, next) {
 
   });
 });
+/* Tắt motor*/
+router.post('/tatmotor', function (req, res, next) {
+// MQTT publisher
+var mqtt = require('mqtt')
+var client = mqtt.connect('mqtt://52.188.19.7:1883')
+var topic = 'Topic/Speaker'
+// var message = 'Hello tempt! 1'
+var message = [   {   "device_id": "Speaker",     "values": ["0", "80"]   } ]
+    var mess = JSON.stringify (message);
+client.on('connect', ()=>{
+  
+        client.publish(topic, mess);
+        console.log('Message off motor sent!',)
+        res.redirect('/trangthaimotor');
+   
+})
 
+//1883
+
+});
+/* Mở motor*/
+router.post('/momotor', function (req, res, next) {
+  // MQTT publisher
+  var mqtt = require('mqtt')
+  var client = mqtt.connect('mqtt://52.188.19.7:1883')
+  var topic = 'Topic/Speaker'
+  // var message = 'Hello tempt! 1'
+  var message = [   {   "device_id": "Speaker",     "values": ["1", "80"]   } ]
+      var mess = JSON.stringify (message);
+  client.on('connect', ()=>{
+    
+          client.publish(topic, mess);
+          console.log('Message off motor sent!',)
+          res.redirect('/trangthaimotor');
+     
+  })
+  
+  //1883
+  
+  });
 
 
 /* GET Dang ki page. */

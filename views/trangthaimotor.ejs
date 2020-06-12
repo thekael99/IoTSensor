@@ -19,6 +19,12 @@
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <p>Trạng thái motor</p>
     <p id="motor"></p>
+    <form action="/tatmotor" method="post">
+    <button type="submit">Tắt motor</button>
+    </form>
+    <form action="/momotor" method="post">
+        <button type="submit">Mở motor</button>
+        </form>
     <script>
         var trangthai =  <%= data.trangthai %>;
         function myTimer() {
