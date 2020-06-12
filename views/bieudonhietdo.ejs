@@ -3,7 +3,8 @@
 
 <head>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
 
@@ -21,34 +22,33 @@
 
 
     <script>
-      var dl = [<%= data %>];
-var label = [<%- label %>];
-
+        var dl = [<%= data %>];
+        var label = [<% - label %>];ß
         function myTimer() {
             dl = [];
-                label = [];
-                
-                $.get("http://localhost:3000/apinhietdo", function (data, status) {
+            label = [];
 
-                    data.forEach(element => {
-                        dl.push(element.nhietdo);
-                        label.push(element.device);
+            $.get("http://localhost:3000/apinhietdo", function (data, status) {
 
-                        //     myChart.data.labels.push(element.device);
-                        //     myChart.data.datasets.forEach((dataset) => {
-                        // dataset.data.push(element.nhietdo);
-                    });
-                    myChart.data.labels = label;
+                data.forEach(element => {
+                    dl.push(element.nhietdo);
+                    label.push(element.device);
 
-                    myChart.data.datasets[0].data = dl;
-
-                    myChart.update();
-
+                    //     myChart.data.labels.push(element.device);
+                    //     myChart.data.datasets.forEach((dataset) => {
+                    // dataset.data.push(element.nhietdo);
                 });
+                myChart.data.labels = label;
+
+                myChart.data.datasets[0].data = dl;
+
+                myChart.update();
+
+            });
         }
 
         var myVar = setInterval(myTimer, 1000);
-        
+
         var ctx = document.getElementById('myChart').getContext('2d');
 
         var myChart = new Chart(ctx, {

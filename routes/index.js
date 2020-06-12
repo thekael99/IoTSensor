@@ -12,6 +12,8 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 //Fetch
 const fetch = require('node-fetch');
 
+
+//DB info
 var con = mysql.createConnection({
   host: "127.0.0.1",
   user: "root",
@@ -20,7 +22,7 @@ var con = mysql.createConnection({
   database: "iot"
 });
 
-// execute your request here
+
 // MQTT subscriber
 var mqtt = require('mqtt');
 const { log } = require('debug');
@@ -28,58 +30,70 @@ const { json } = require('express');
 var client = mqtt.connect('mqtt://52.188.19.7:1883')
 //mqtt://13.76.250.158:1883
 //mqtt://52.188.19.7:1883
-var topic = 'Topic/TempHumi'
 
-client.on('message', (topic, message) => {
+//Sub sensor start
+var topicSensor = 'Topic/TempHumi';
+
+client.on('message', (topicSensor, message) => {
   //  message = message.toString();
   message = JSON.parse(message)[0];
+  if(message.device_id == 'TempHumi '){
 
-
-  //   //Ket noi
+  
+   //Ket noi
   var insert = `INSERT INTO CamBien (device,nhietdo,doam) values ('${message.device_id}','${message.values[0]}','${message.values[1]}') `
 
   con.query(insert, function (err, result, fields) {
     if (err) throw err;
   });
+}
 })
 
 client.on('connect', () => {
-  client.subscribe(topic)
+  client.subscribe(topicSensor)
 })
+//Sub sensor End
+//Sub motor start
+
+var topicMotor = 'Topic/Speaker';
+
+client.on('message', (topicMotor, message) => {
+
+  message = JSON.parse(message)[0];  
+
+  if(message.device_id == 'Speaker'){
+
+   //Ket noi
+  var insert = `INSERT INTO Motor (device,trangthai,value) values ('${message.device_id}','${message.values[0]}','${message.values[1]}') `
+
+  con.query(insert, function (err, result, fields) {
+    if (err) throw err;
+  });
+}
+})
+
+client.on('connect', () => {
+  client.subscribe(topicMotor)
+})
+
+//Sub motor end
+
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  // //Ket noi
-  // con.connect(function(err) {
-  //  // if (err) throw err;
-  //   con.query("SELECT * FROM user", function (err, result, fields) {
-  //    if (err) throw err;
-  //     console.log(result);
-
-
-   //Ket noi
   var select = `SELECT * FROM CamBien `;
   con.query(select, function (err, result, fields) {
     if (err) throw err;
     var data = [];
     var label = [];
-
     result.forEach(element => {
       data.push(element.nhietdo);
       label.push(`'${element.device}'`);
-
     });
-
-
     res.render('index', { title: 'Express', label: label, data: data });
-
   });
-
-
-  //   });
-  // });
 });
-/* API data . */
+/* API data nhiet do. */
 router.get('/apinhietdo', function (req, res, next) {
   var select = `SELECT * FROM CamBien where idCamBien `;
   con.query(select, function (err, result, fields) {
@@ -108,6 +122,35 @@ router.get('/bieudonhietdo', function (req, res, next) {
 
   });
 });
+/* GET Trang thai motor. */
+router.get('/trangthaimotor', function (req, res, next) {
+var data;
+var select = `SELECT * FROM iot.Motor where idMotor = (select Max(idMotor) from iot.Motor); `;
+con.query(select, function (err, result, fields) {
+    if (err) throw err;
+    console.log(result);
+    
+    data = result[0]
+    console.log(data);
+    res.render('trangthaimotor', { title: 'Express',  data: data });
+
+  })
+  
+
+
+});
+/* API data motor . */
+router.get('/apimotor', function (req, res, next) {
+  var select = `SELECT * FROM iot.Motor where idMotor = (select Max(idMotor) from iot.Motor); `;
+  con.query(select, function (err, result, fields) {
+    if (err) throw err;
+    res.send(result);
+
+  });
+});
+
+
+
 /* GET Dang ki page. */
 router.get('/dangki', controller.dangki);
 /* POST home page. */
