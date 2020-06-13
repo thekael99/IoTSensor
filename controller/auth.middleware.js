@@ -1,6 +1,7 @@
 
 var md5 = require('md5');
 var mysql = require('mysql');
+const { log } = require('debug');
 var con = mysql.createConnection({
     host: "thien",
     user: "root",
@@ -20,21 +21,19 @@ var con = mysql.createConnection({
 module.exports.xacthucdangnhap = function (req, res, next) {
     var usr = req.body.usr;
     var pass = md5(req.body.pass);
+ var sql= `SELECT * FROM user where username = '${usr}' `;
+//var sql = `INSERT INTO user (username, password,phone,role) VALUES ('${usr}','${pass}','${phone}','${role}')`;
+con.query(sql, function (err, result, kq) {
+    if (err) {
+        console.log(err);
+        return res.render('dangnhap', { title: 'Express', status: 'Co loi khi dang ki' });
+    }  
+    console.log(result);
+    
 
+})
 
-    var find = db.get('User').find({ username: usr }).value();
-    if (!find) {
-        res.render('dangnhap', { title: 'Express', status: 'Tai khoan chua duoc dang ki' });
-    } else {
-        if (usr == find.username && pass == find.password) {
-            res.cookie('info', { 'username': usr, 'password': pass, 'role': find.role });
-            res.redirect('/');
-        }
-        else {
-            res.render('dangnhap', { title: 'Express', status: 'Dang nhap that bai' });
-
-        }
-    }
+    
 }
 
 module.exports.authen = function (req, res, next) {

@@ -40,40 +40,36 @@ module.exports.xacthucdangki = function (req, res) {
     var pass = md5(req.body.pass);
     var phone = req.body.phone;
     var role = req.body.role;
+    var status;
     //Ket noi
     var kq;
     // if (err) throw err;
-    var sql1 = `SELECT * FROM user where username = '${usr}' `;
-
-    // con.query(sql1, function (err, result) {
-    //     if (err) throw err;
-    //     //  console.log(result[0]);
-
-    //     kq = result[0].username;
-    //     //     kq = result;
-
-    //     if (result[0].username == usr) {
-    //         return res.render('dangki', { title: 'Express', status: 'Tai khoan da duoc dang ki' });
-
-    //     } else {
-    //         var sql2 = `INSERT INTO user (username, password, role, phone) VALUES ('${usr}','${pass}','${role}','${phone}')`;
-    //         con.query(sql2, function (err, result) {
-    //             if (err) throw err;
-    //         });
-    //     }
-    //     return res.render('dangnhap', { title: 'Express', status: 'Dang ki thanh cong', });
-
-    // });
+    // var sql1 = `SELECT * FROM user where username = '${usr}' `;
+    var sql = `INSERT INTO user (username, password,phone,role) VALUES ('${usr}','${pass}','${phone}','${role}')`;
+    con.query(sql, function (err, result, kq) {
+        if (err) {
+            console.log(err);
+            return res.render('dangki', { title: 'Express', status: 'Co loi khi dang ki' });
 
 
+        } else
+            return res.render('dangnhap', { title: 'Express', status: 'ok' });
 
-
-    // res.render('dangki', { title: 'Express', status: 'Tai khoan da duoc dang ki' });
-
+    })
 
 
 
 }
+
+
+
+
+// res.render('dangki', { title: 'Express', status: 'Tai khoan da duoc dang ki' });
+
+
+
+
+
 module.exports.dangnhap = function (req, res, next) {
     if (req.cookies.info) {
         if (req.cookies.info.username) {
