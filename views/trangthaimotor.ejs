@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <p>Trạng thái motor</p>
+    <p id="motor"></p>
+    <form action="/tatmotor" method="post">
+    <button type="submit">Tắt motor</button>
+    </form>
+    <form action="/momotor" method="post">
+        
+        <button type="submit">Mở motor</button>
+        </form>
+
+        <form action="/getlimit" method="post">
+            <h1> <%= status %> </h1>
+            <label for="">Giới hạn nhiệt độ trên</label>
+            <input type="text" name="up" class="form-control"   placeholder="Enter tempt" value="<%= obj.gioihantren %>">
+            <label for="">Giới hạn nhiệt độ dưới</label>
+            <input type="text" name="down" class="form-control"  placeholder="Enter tempt" value="<%= obj.gioihanduoi %>">
+            <button type="submit">Submit</button>
+            </form>
+
+
+
+    <script>
+        var trangthai =  <%= data.trangthai %>;
+        function myTimer() {
+        $.get("http://localhost:3000/apimotor", function (data, status) {
+              
+           trangthai = data[0].trangthai;
+           console.log(trangthai);
+           
+           if (trangthai == 1) {
+                document.getElementById("motor").innerHTML = "Motor đang chạy";
+
+            } else {
+                document.getElementById("motor").innerHTML = "Motor đang dừng";
+            }
+        });
+    }
+        function myFunction(trangthai) {
+            if (trangthai == 1) {
+                document.getElementById("motor").innerHTML = "Motor đang chạy";
+
+            } else {
+                document.getElementById("motor").innerHTML = "Motor đang dừng";
+            }
+        }
+        myFunction(trangthai);
+        var myVar = setInterval(myTimer, 1000);
+
+    </script>
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
