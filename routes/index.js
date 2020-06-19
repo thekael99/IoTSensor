@@ -155,7 +155,7 @@ router.get('/sosanhnhietdo', function (req, res, next) {
   const compare = 30;
   con.query(select, function (err, result, fields) {
     if (err) throw err;
-    if (result == compare) {
+    if (result >= compare) {
       var mqtt = require('mqtt')
       var client = mqtt.connect('mqtt://52.188.19.7:1883')
       var topic = 'Topic/Speaker'
