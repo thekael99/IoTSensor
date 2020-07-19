@@ -18,9 +18,9 @@ var d = new Date();
 
 //DB info
 var con = mysql.createConnection({
-  host: "127.0.0.1",
+  host: "localhost",
   user: "root",
-  password: "admin123",
+  password: "30041999",
   port: "3306",
   database: "iot"
 });
@@ -58,64 +58,64 @@ const ex = async () => {
 }
 
 
- client.on('message', (topicSensor, message) => {
+client.on('message', (topicSensor, message) => {
   message = JSON.parse(message)[0];
   let tempt = message;
 
-   async function a(message){
-     
+  async function a(message) {
+
     limit = await axios.get('http://localhost:3000/apigioihannhietdo');
 
-    
 
 
-if (message.device_id == 'TempHumi ') {
-  
-  
-        //them vao db
-  var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `;
-  var run =  con.query(insert);
 
-  
-  if(message.values[0] > limit.data[0].gioihantren){
-    //On motor
-// MQTT publisher
-var client = mqtt.connect(ip)
-var topic = 'Topic/Speaker'
-// var message = 'Hello tempt! 1'
-var message = [{ "device_id": "Speaker", "values": ["1", "80"] }]
-var mess = JSON.stringify(message);
-client.on('connect', () => {
-
-client.publish(topic, mess);
-console.log('Message on motor sent!',)
+    if (message.device_id == 'TempHumi ') {
 
 
-})
-  } else if(message.values[0] < limit.data[0].gioihanduoi){
-      //OFF motor
-// MQTT publisher
-var client = mqtt.connect(ip)
-var topic = 'Topic/Speaker'
-// var message = 'Hello tempt! 1'
-var message = [{ "device_id": "Speaker", "values": ["0", "80"] }]
-var mess = JSON.stringify(message);
-client.on('connect', () => {
-
-client.publish(topic, mess);
-console.log('Message off motor sent!',)
+      //them vao db
+      var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `;
+      var run = con.query(insert);
 
 
-  })
-}
-  
-  
+      if (message.values[0] > limit.data[0].gioihantren) {
+        //On motor
+        // MQTT publisher
+        var client = mqtt.connect(ip)
+        var topic = 'Topic/Speaker'
+        // var message = 'Hello tempt! 1'
+        var message = [{ "device_id": "Speaker", "values": ["1", "80"] }]
+        var mess = JSON.stringify(message);
+        client.on('connect', () => {
+
+          client.publish(topic, mess);
+          console.log('Message on motor sent!',)
 
 
-  // var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select Max(id) from iot.Motor); `;
- 
-}
-   }
+        })
+      } else if (message.values[0] < limit.data[0].gioihanduoi) {
+        //OFF motor
+        // MQTT publisher
+        var client = mqtt.connect(ip)
+        var topic = 'Topic/Speaker'
+        // var message = 'Hello tempt! 1'
+        var message = [{ "device_id": "Speaker", "values": ["0", "80"] }]
+        var mess = JSON.stringify(message);
+        client.on('connect', () => {
+
+          client.publish(topic, mess);
+          console.log('Message off motor sent!',)
+
+
+        })
+      }
+
+
+
+
+      // var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select Max(id) from iot.Motor); `;
+
+    }
+  }
   a(tempt);
 
 })
