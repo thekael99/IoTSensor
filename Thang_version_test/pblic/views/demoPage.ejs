@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+
+  <!-- JS, Popper.js, and jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+    integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+</head>
+
+<body>
+  <p id="user-id-socket" style="display: none;"><%= id %></p>
+  <div class="container" style="margin-top: 70px;">
+    <div class="row">
+      <div class="col-md-6" style="border-right: solid 1px black; padding-right: 50px;">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <button id="coordinatebtn" class="input-group-text text-info">
+              Coordinates
+            </button>
+          </div>
+          <input id="logitude" type="text" placeholder="Longitude" aria-label="First name" class="form-control" />
+          <input id="latitude" type="text" placeholder="Latitude" aria-label="Last name" class="form-control" />
+        </div>
+        <br />
+        <div class="input-group mb-3">
+          <input id="radius" type="text" class="form-control" placeholder="Radius" aria-label="Recipient's username"
+            aria-describedby="button-addon2" />
+          <div class="input-group-append">
+            <button id="btn-radius" class="btn btn-outline-secondary" type="button" id="button-addon2">
+              Button
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div>
+          <p class="GPS">Now Infor: <span id="GPSInfor">Topic/GPS</span></p>
+          <p>Longitude: <span id="Longitude">100</span></p>
+          <p>Latitude: <span id="Latitude">99</span></p>
+          <p>State: <span id="State">True</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript">
+  // Generate origin element
+  let countTime = 0;
+  let Longitude = document.getElementById("Longitude");
+  let Latitude = document.getElementById("Latitude");
+  let State = document.getElementById("State");
+  let IpLong = document.getElementById("logitude");
+  let IpLat = document.getElementById("latitude");
+
+  // Get original data, set to orign element
+  $.ajax({
+    url: "/cli-main/get-devices-gps-information",
+    type: "POST",
+  }).done((result) => {
+    console.log(result);
+    result = result[0];
+    document.getElementById("GPSInfor").textContent = result._id;
+
+    Longitude.textContent = result.DeviceData.Longitude;
+    Latitude.textContent = result.DeviceData.Latitude;
+    // State.textContent = result.DeviceStatus;
+    parseState(result.DeviceStatus);
+  });
+
+  $.ajax({
+    url: "/cli-main/get-original-value",
+    type: "POST",
+  }).done((result) => {
+    console.log(result);
+  });
+
+  // Update gps coordinates, realtime response with socket
+  $("#coordinatebtn").click((e) => {
+    console.log("CLOC");
+    $.ajax({
+      url: "/cli-main/update-gps-coordinates",
+      type: "POST",
+      data: {
+        GPSID: $("#GPSInfor").text(),
+        Long: IpLong.value,
+        Lat: IpLat.value,
+      },
+    }).done((res) => {
+      console.log(res);
+    });
+  });
+
+  // Update gps radius gps, realtime response with socket
+  $("#btn-radius").click((e) => {
+    $.ajax({
+      type: "POST",
+      url: "/cli-main/update-gps-radius",
+      data: {
+        GPSID: $("#GPSInfor").text(),
+        Radius: $("#radius").val(),
+      },
+    }).done((res) => {
+      console.log(res);
+    });
+  });
+
+  // Initial  socket connection (real time connection)
+  const socket = io.connect(window.location.hostname);
+  // const socket = io.connect('https://getdateset.herokuapp.com')
+
+  // Sign socket with user id, and remove it in client-view
+  document.addEventListener("DOMContentLoaded", function () {
+    socket.emit(
+      "sign-in-socket",
+      document.getElementById("user-id-socket").textContent
+    );
+    document.getElementById("user-id-socket").remove();
+  });
+
+  // Whenever MQTT get new DBMS, if It going to be changed,
+  //  emit to user socket online
+  socket.on("emit-new-gps", (data) => {
+    // console.log(data)
+    //  data.gpsID; ID of GPS, user for determine what is the GPS change
+    Longitude.textContent = data.data[0];
+    Latitude.textContent = data.data[1];
+  });
+
+  // Whenever data change, MQTT, User change, ...,
+  // Server response to client new status of device
+  socket.on("update-status-GPS", (data) => {
+    // id: ID of GPS, string type
+    console.log(data);
+    parseState(data.status);
+  });
+
+  function parseState(state) {
+    if (state == 1) {
+      State.textContent = "Danger";
+      State.style.color = "red";
+    } else {
+      State.textContent = "Safe";
+      State.style.color = "Green";
+    }
+  }
+</script>
+
+</html>

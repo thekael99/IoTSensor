@@ -18,9 +18,9 @@ var d = new Date();
 
 //DB info
 var con = mysql.createConnection({
-  host: "127.0.0.1",
+  host: "localhost",
   user: "root",
-  password: "admin123",
+  password: "30041999",
   port: "3306",
   database: "iot"
 });
