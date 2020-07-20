@@ -1,0 +1,343 @@
+<%- include("function/header.ejs") %>
+
+  <style>
+    .slidecontainer {
+      width: 100%;
+    }
+
+    /* Cirle */
+
+    #svg circle {
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+      stroke: #666;
+      stroke-width: 1em;
+    }
+
+    #svg #bar {
+      stroke: #FF9F1E;
+    }
+
+    #cont {
+      display: block;
+      height: 200px;
+      width: 200px;
+      margin: 2em auto;
+      border-radius: 100%;
+      position: relative;
+    }
+
+    #cont:after {
+      position: absolute;
+      display: block;
+      height: 160px;
+      width: 160px;
+      left: 50%;
+      top: 50%;
+      content: attr(data-pct)"%";
+      margin-top: -80px;
+      margin-left: -80px;
+      border-radius: 100%;
+      line-height: 160px;
+      font-size: 2em;
+    }
+
+    input {
+      background: white;
+    }
+
+
+    /* Make things perty */
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+      background-color: #0d0d0d;
+      color: #fff;
+      height: 100%;
+      padding-top: 2em;
+      text-align: center;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      text-transform: uppercase;
+      text-shadow: 0 0 0.5em black;
+    }
+
+    h2 {
+      font-weight: 300
+    }
+
+    input {
+      border: 1px solid #666;
+      background: #333;
+      color: #fff;
+      padding: 0.5em;
+      box-shadow: none;
+      outline: none !important;
+      margin: 1em auto;
+      text-align: center;
+    }
+  </style>
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <%- include("function/navbar.ejs") %>
+
+
+
+          <!-- Begin Page Content -->
+          <div class="container-fluid">
+
+            <!-- Page Heading -->
+            <h1 class="h3 mb-2 text-gray-800">Charts</h1>
+            <p class="mb-4">Chart.js is a third party plugin that is used to generate the charts in this theme. The
+              charts below have been customized - for further customization options, please visit the <a target="_blank"
+                href="https://www.chartjs.org/docs/latest/">official Chart.js documentation</a>.</p>
+
+            <!-- Content Row -->
+            <div class="row">
+
+              <div class="col-xl-8 col-lg-7">
+
+                <!-- mychart   -->
+                <!-- Area Chart -->
+                <div class="card shadow mb-4">
+                  <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Area Chart</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-area">
+                      <canvas id="myChart"></canvas>
+                    </div>
+                    <hr>
+                  </div>
+                </div>
+
+                <!-- Bar Chart -->
+                <div class="card shadow mb-4">
+                  <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bar Chart</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-bar">
+                      <canvas id="myBarChart"></canvas>
+                    </div>
+                    <hr>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Donut Chart -->
+              <div class="bom">
+                <h4>Điều chỉnh bơm</h4>
+
+                <div class="col-xl-12 col-lg-12">
+                  <h4>Trạng thái </h4>
+                  <p id="motor"></p>
+                  <form action="/tatmotor" method="post">
+                    <button class="btn btn-danger" type="submit">Tắt</button>
+                  </form>
+                  <form action="/momotor" method="post">
+                    <div class="slidecontainer">
+                      <p>Cường độ</p>
+                      <input type="range" min="1" max="100" value="0">
+                    </div>
+                    <button class="btn btn-primary" type="submit">Mở</button>
+                  </form>
+                  <div class="themgiohannhietdo">
+                  </div>
+
+                </div>
+                <form action="/getlimit" method="post">
+                  <h1> <%= status %> </h1>
+                  <label for="">Giới hạn nhiệt độ trên</label>
+                  <input type="text" name="up" class="form-control" placeholder="Enter tempt"
+                    value="<%= obj.gioihantren %>">
+                  <label for="">Giới hạn nhiệt độ dưới</label>
+                  <input type="text" name="down" class="form-control" placeholder="Enter tempt"
+                    value="<%= obj.gioihanduoi %>">
+                  <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+
+
+              </div>
+
+
+
+
+
+              <script>
+                var trangthai =  <%= data.trangthai %>;
+                function myTimer() {
+                  $.get("http://localhost:3000/apimotor", function (data, status) {
+
+                    trangthai = data[0].trangthai;
+                    console.log(trangthai);
+
+                    if (trangthai == 1) {
+                      document.getElementById("motor").innerHTML = "Motor đang chạy";
+
+                    } else {
+                      document.getElementById("motor").innerHTML = "Motor đang dừng";
+                    }
+                  });
+                }
+                function myFunction(trangthai) {
+                  if (trangthai == 1) {
+                    document.getElementById("motor").innerHTML = "Motor đang chạy";
+
+                  } else {
+                    document.getElementById("motor").innerHTML = "Motor đang dừng";
+                  }
+                }
+                myFunction(trangthai);
+                var myVar = setInterval(myTimer, 2000);
+
+              </script>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Your Website 2019</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+            <a class="btn btn-primary" href="login.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var nhietdo = [];
+      var label = [];
+      var doam = [];
+
+      function myTimer() {
+        nhietdo = [];
+        label = [];
+        doam = [];
+        $.get("http://localhost:3000/apinhietdo", function (data, status) {
+
+          data.forEach(element => {
+            nhietdo.push(element.nhietdo);
+            doam.push(element.doam);
+
+            label.push(element.thoigian.slice(15, 24));
+
+            //     myChart.data.labels.push(element.device);
+            //     myChart.data.datasets.forEach((dataset) => {
+            // dataset.data.push(element.nhietdo);
+          });
+          //   myChart.data.labels = label;
+
+          myChart.data.datasets[0].data = nhietdo;
+          myChart.data.datasets[1].data = doam;
+          myChart.data.labels = label;
+
+          myChart.update();
+
+        });
+      }
+
+      var myVar = setInterval(myTimer, 2000);
+
+      var ctx = document.getElementById('myChart').getContext('2d');
+
+      var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: label,
+          datasets: [
+            {
+              label: "Nhiệt độ",
+              fill: true,
+              backgroundColor: 'rgb(190, 99, 255, 0.25)',
+              borderColor: 'rgb(190, 99, 255)',
+              data: nhietdo,
+            },
+            {
+              label: "Độ ẩm",
+              fill: false,
+              backgroundColor: 'rgba(255, 99, 132, 0.25)',
+              borderColor: 'rgb(255, 99, 132)',
+              data: doam,
+            }
+          ]
+        }, options: {
+          scales: {
+            xAxes: [{
+              ticks: {
+                callback: function (tick, index, array) {
+                  if ((index % 2) == 0) {
+                    return "Bỏ"
+                  } else {
+                    return "Ko bỏ"
+                  }
+                  // return () ? "" : tick;
+                }
+              }
+            }]
+          }
+        }
+      }
+      );
+
+
+    </script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
+  </body>
+
+</html>

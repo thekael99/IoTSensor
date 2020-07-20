@@ -58,64 +58,64 @@ const ex = async () => {
 }
 
 
- client.on('message', (topicSensor, message) => {
+client.on('message', (topicSensor, message) => {
   message = JSON.parse(message)[0];
   let tempt = message;
 
-   async function a(message){
-     
+  async function a(message) {
+
     limit = await axios.get('http://localhost:3000/apigioihannhietdo');
 
-    
 
 
-if (message.device_id == 'TempHumi ') {
-  
-  
-        //them vao db
-  var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `;
-  var run =  con.query(insert);
 
-  
-  if(message.values[0] > limit.data[0].gioihantren){
-    //On motor
-// MQTT publisher
-var client = mqtt.connect(ip)
-var topic = 'Topic/Speaker'
-// var message = 'Hello tempt! 1'
-var message = [{ "device_id": "Speaker", "values": ["1", "80"] }]
-var mess = JSON.stringify(message);
-client.on('connect', () => {
-
-client.publish(topic, mess);
-console.log('Message on motor sent!',)
+    if (message.device_id == 'TempHumi ') {
 
 
-})
-  } else if(message.values[0] < limit.data[0].gioihanduoi){
-      //OFF motor
-// MQTT publisher
-var client = mqtt.connect(ip)
-var topic = 'Topic/Speaker'
-// var message = 'Hello tempt! 1'
-var message = [{ "device_id": "Speaker", "values": ["0", "80"] }]
-var mess = JSON.stringify(message);
-client.on('connect', () => {
-
-client.publish(topic, mess);
-console.log('Message off motor sent!',)
+      //them vao db
+      var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `;
+      var run = con.query(insert);
 
 
-  })
-}
-  
-  
+      if (message.values[0] > limit.data[0].gioihantren) {
+        //On motor
+        // MQTT publisher
+        var client = mqtt.connect(ip)
+        var topic = 'Topic/Speaker'
+        // var message = 'Hello tempt! 1'
+        var message = [{ "device_id": "Speaker", "values": ["1", "80"] }]
+        var mess = JSON.stringify(message);
+        client.on('connect', () => {
+
+          client.publish(topic, mess);
+          console.log('Message on motor sent!',)
 
 
-  // var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select Max(id) from iot.Motor); `;
- 
-}
-   }
+        })
+      } else if (message.values[0] < limit.data[0].gioihanduoi) {
+        //OFF motor
+        // MQTT publisher
+        var client = mqtt.connect(ip)
+        var topic = 'Topic/Speaker'
+        // var message = 'Hello tempt! 1'
+        var message = [{ "device_id": "Speaker", "values": ["0", "80"] }]
+        var mess = JSON.stringify(message);
+        client.on('connect', () => {
+
+          client.publish(topic, mess);
+          console.log('Message off motor sent!',)
+
+
+        })
+      }
+
+
+
+
+      // var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select Max(id) from iot.Motor); `;
+
+    }
+  }
   a(tempt);
 
 })
@@ -193,27 +193,30 @@ router.get('/apigioihannhietdo', function (req, res, next) {
   });
 });
 //Bieu do
-router.get('/bieudonhietdo', function (req, res, next) {
+router.get('/detrong', function (req, res, next) {
 
   var select = `SELECT * FROM CamBien `;
   con.query(select, function (err, result, fields) {
     if (err) throw err;
-    var data = [];
+    var nhietdo = [];
     var label = [];
+    var doam = [];
 
     result.forEach(element => {
-      data.push(element.nhietdo);
-      label.push(`'${element.device}'`);
+      nhietdo.push(element.nhietdo);
+      doam.push(element.doam);
+      
+      label.push(`'${element.thoigian.slice(15, 24)}'`);
 
     });
 
 
-    res.render('bieudonhietdo', { title: 'Express', label: label, data: data });
+    res.render('bieudonhietdo', { title: 'Express', label: label, nhietdo: nhietdo, doam: doam });
 
   });
 });
 /* GET Trang thai motor. */
-router.get('/trangthaimotor', function (req, res, next) {
+router.get('/bieudonhietdo', function (req, res, next) {
   status = "";
   var obj = {
     "gioihantren": "chuaxacdinh",
@@ -239,7 +242,7 @@ router.get('/trangthaimotor', function (req, res, next) {
 
           data = result[0];
           console.log(data);
-          res.render('trangthaimotor', { title: 'Express', data: data, obj: obj, status: status });
+          res.render('bieudonhietdo', { title: 'Express', data: data, obj: obj, status: status });
 
         }
       })
