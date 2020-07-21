@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <header>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/views/pblic/son.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+            integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+            crossorigin="anonymous"
+        ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    </header>
+    <body style="margin:0">
+        <p id="user-id-socket" style="display: none;"><%= id %></p>
+        <div class="container-fluid">
+            <div id="googleMap"></div>
+            <div class="my_button">
+                <button style="width: 60px; height: 50px; cursor: pointer;"><i class="fa fa-home fa-3x" aria-hidden="true"></i></button>
+                <button style="width: 60px; height: 50px; cursor: pointer;" ><i class="fa fa-user-circle-o fa-3x" aria-hidden="true"></i></button>
+                <button style="width: 60px; height: 50px; cursor: pointer;" onclick="addDeviceOn()"><i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i></button>
+                <button style="width: 60px; height: 50px; cursor: pointer;" id="setting"><i class="fa fa-cog fa-3x" aria-hidden="true"></i></button>
+                <button style="width: 60px; height: 50px; cursor: pointer;"><i class="fa fa-map-marker fa-3x" aria-hidden="true"></i></button>
+                <button style="width: 60px; height: 50px; cursor: pointer;"><i class="fa fa-sign-out fa-3x" aria-hidden="true"></i></button>
+            </div>
+            <div id="addDevice">
+                <h3>New device</h3>
+                <form>
+                    <div class="input-w" float="left">
+                        <label for="search">Search ID:</label>
+                        <input type="text" class="searchID" id="searchID" placeholder="..." />
+                        <button type="button" id="search"><i class="fa fa-search fa-2x" aria-hidden="true"></i></button>
+                    </div>
+                </form>
+                <div id="about">
+                    <div class="abt">
+                        <p>About</p>
+                    </div>
+                    <div>
+                        <p>Device ID: <span id="id"></span></p>
+                        <p>Device name: <span id="name"></span></p>
+                        <p>Type: <span id="type"></span></p>
+                        <p>State: <span id="state"></span></p>
+                    </div>
+                    <div style="position:absolute; right:146px">
+                        <button id="add_button">Add</button>
+                    </div>
+                </div>
+            </div>
+            <div id="settingDevice">
+                <h3> Settings device</h3>
+                <div style="border-top: 1px solid black; height:50px; padding-top:5px">
+                    <img class="bell" src="/views/pblic/img/location.png" alt="" width="40px" height="40px" float="none" />
+                    <img class="location" src="/views/pblic/img/bell.png" alt="" width="40px" height="40px" />
+                </div>
+                <form>
+                    <div id="all-device" class="setting">
+                        <!-- <label id="GPS" for="GPS" style="margin-right: 50px"></label>
+                        <img src="/views/pblic/img/tools.png" alt="" width="20px" height ="20px" style="position: absolute; left: 47%; margin-top:2px"/>
+                        <select id="choose">
+                            <option>LED1</option>
+                        </select> -->
+                    </div>
+                </form>
+                <div style="position:absolute; bottom:20px; right:100px">
+                    <button id="setting_button">Confirm</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            var x = new Boolean(false)
+            var y = new Boolean(false)
+            function myMap() {
+                var mapProp= {
+                    center:new google.maps.LatLng(10.880693, 106.804869),
+                    zoom:15,
+                };
+                var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+            }
+            function addDeviceOn() {
+                document.getElementById("settingDevice").style.display = "none";
+                y = false;
+                if (x == true){
+                    document.getElementById("addDevice").style.display = "none";
+                    x = false;
+                }
+                else{
+                    document.getElementById("addDevice").style.display = "block";
+                    x = true;
+                }
+            }
+            function settingOn() {
+                document.getElementById("addDevice").style.display = "none";
+                x = false;
+                //document.getElementById("settingDevice").style.display = "block";
+                if (y == true){
+                    document.getElementById("settingDevice").style.display = "none";
+                    y = false;
+                }
+                else{
+                    document.getElementById("settingDevice").style.display = "block";
+                    y = true;
+                }
+            }
+            
+
+            let id = document.getElementById("id")
+            let name = document.getElementById("name")
+            let type = document.getElementById("type")
+            let state = document.getElementById("state")
+            let GPSIDList = []
+            let GPSList = []
+            let j = 0
+            let gps = document.getElementById("GPS")
+            // $("add_button").click((e) => {
+            //     console.log("abc");
+            // })
+            $("#search").click(function() {
+                //console.log("abc");
+                var search = $('#searchID').val();
+                var idLength = search.length;
+                console.log(idLength)
+                if (search == ''){
+                    alert('Please type Device ID')
+                }
+                // else if (idLength != 24){
+                //     alert('Device ID must be string of 24 hex characters')
+                // }
+                else {
+                    $.ajax({
+                        url: "/cli-main/search-device",
+                        type: "POST",
+                        data: {
+                            DeviceID: search,
+                        }
+                    }).done((result) => {
+                        if (result == false){
+                            alert('Incorrect ID, please try again!')
+                        }
+                        else {
+                            document.getElementById("about").style.display = "block";
+                            console.log(result);
+                            //result = result[0];
+                            id.textContent = result.DeviceID;
+                            name.textContent = result.DeviceName;
+                            if (result.Devicetype == 0){
+                                type.textContent = "GPS"
+                            }
+                            else {
+                                type.textContent = "Light"
+                            }
+                            state.textContent = "Free";
+                        }
+                    });
+                }
+            });
+            $("#add_button").click(function() {
+                //console.log("abc");
+                var search = $('#searchID').val();
+                //var id = document.getElementById("user-id-socket").textContent;
+                $.ajax({
+                    url: "/cli-main/add-device",
+                    type: "POST",
+                    data: {
+                        //DeviceOwnerID: id,
+                        DeviceID: search,
+                    }
+                }).done((result) => {
+                    alert("Device added!")
+                    console.log(result);
+                });
+            });
+            $("#setting").click(function(){
+                settingOn();
+                var search = $('#searchID').val();
+                if (y == true){
+                    $.ajax({
+                        url: "/cli-main/get-all-device",
+                        type: "POST",
+                        // data: {
+                        //     DeviceID: search,
+                        // }
+                    }).done((result) => {
+                    
+                    });
+                }
+            })
+            $.ajax({
+                url: "/cli-main/get-all-device",
+                type: "POST",
+            }).done((result) => {
+                for (let i=0; i<result.length; i++){
+                    if (result[i].Devicetype == 0){
+                        GPSIDList[j] = result[i].DeviceID
+                        GPSList[j] = result[i];
+                        // gps.textContent = GPSList[j].DeviceName;
+                        // console.log(GPSList[j].DeviceID);
+                        $("#all-device").append(
+                            //<label id="GPS" for="GPS" style="margin-right: 50px">GPS</label>
+                            "<label id='GPS"+j+"'for='GPS' style='margin-right: 130px;'>"+GPSList[j].DeviceName+"</label>"+
+                            "<img src='/views/pblic/img/tools.png' alt='' width='20px' height ='20px' style='position: absolute; left: 47%; margin-top:2px;'/>"+
+                            " <select id='choose"+j+"' style='position:relative; left:62px; top:-24px'></select>"+
+                            "<br></br>"
+                        )
+                        j++;
+                    }
+                }
+                for (let m=0; m<j; m++){
+                    for (let k=0; k<result.length; k++){
+                    if (result[k].Devicetype==1){
+                        // console.log(result[k].DeviceName)
+                        $("#choose"+m).append(
+                            "<option value="+result[k].DeviceID+">"+result[k].DeviceName+"</option>"
+                        )
+                    }
+                }
+                }
+            });
+
+            let List = []
+
+            $("#setting_button").click(function(){
+                // var a = document.getElementById("choose1")
+                // var b = a.options[a.selectedIndex].value;
+                // console.log(b)
+                var a = []
+                var b = []
+                //console.log(j)
+                for (let i=0; i<j; i++){
+                    a[i] = document.getElementById("choose"+i)
+                    b[i] = a[i].options[a[i].selectedIndex].value;
+                    // console.log(b[i])
+                    // console.log(GPSIDList[i])
+                    List.push([GPSIDList[i],b[i]])
+                }
+                console.log(List)
+                $.ajax({
+                    url: "/cli-main/settings-device",
+                    type: "POST",
+                    data: {
+                        List: JSON.stringify(List),
+                    }
+                }).done((result) => {
+                    alert("Settings completed!")
+                    console.log(result);
+                });
+            })
+            const socket = io.connect("http://localhost:5000");
+            document.addEventListener("DOMContentLoaded", function () {
+                socket.emit(
+                    "sign-in-socket",
+                    document.getElementById("user-id-socket").textContent
+                );
+                document.getElementById("user-id-socket").remove();
+            });
+            socket.on("emit-new-gps", (data) => {
+            // console.log(data)
+            //  data.gpsID; ID of GPS, user for determine what is the GPS change
+                Longitude.textContent = data.data[0];
+                Latitude.textContent = data.data[1];
+            });
+            socket.on("update-status-GPS", (data) => {
+                // id: ID of GPS, string type
+                console.log(data);
+                parseState(data.status);
+            });
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsxhaM3-9si1YOfppMVlPAn3Wp1Rs7r-s&&callback=myMap"></script>
+    </body>
+</html>

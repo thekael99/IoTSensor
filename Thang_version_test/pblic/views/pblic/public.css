@@ -1,0 +1,65 @@
+/* Header style */
+.head-s-confi{
+    background-color: #1d1d1d;
+    border-bottom: solid 6px #3b3b3b;
+}
+
+.lg-c{
+    max-width: 3vw;
+    max-height: 3vw;
+    animation: logospin 2s linear infinite;
+}
+
+
+.span-header{
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-size: 1.4em;
+    background: -webkit-linear-gradient(45deg, #eee, red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.s-p-h-small{
+    font-size: 1.2em;
+    background: -webkit-linear-gradient(#eee, grey);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Login-logout Style */
+
+
+/* Main style */
+
+
+/* Footer style */
+::-webkit-scrollbar {
+    display: none;
+  }
+.carousel-indicators li{
+    height: 2vw;
+    width: 2vw;
+    border-radius: 50%;
+}
+.carousel-item{
+    opacity: 0.5;
+}
+.ul-header li{
+    text-align: center;
+}
+.redirect-signin{
+    cursor: pointer;
+    color: blue;
+}
+.redirect-signin:hover{
+    color: orange;
+}
+
+@keyframes logospin{
+    0% {
+		transform: rotateZ(0);
+	}
+	100% {
+		transform: rotateZ(-360deg);
+    }
+}
