@@ -191,7 +191,7 @@
                   <div class="card-body">
                     <div class="themgiohannhietdo" style="display:none">
                       <p id="trangthaigioihannhietdo"></p>
-                      <form id="formtrangthaigioihannhietdo" action="/getlimit" method="post">
+                      <form id="formtrangthaigioihannhietdo" action="" method="">
                         <h1> <%= status %> </h1>
                         <label for="">Giới hạn nhiệt độ trên</label>
                         <input type="text" id="gioihantren" name="up" class="form-control" placeholder="Enter tempt"
@@ -199,9 +199,14 @@
                         <label for="">Giới hạn nhiệt độ dưới</label>
                         <input type="text" name="down" id="gioihanduoi" class="form-control" placeholder="Enter tempt"
                           value="<%= obj.gioihanduoi %>">
+                        <div class="slidecontainer">
+                          <input type="range" min="1" max="100" id="giatricuongdotempt" name="cuongdo"
+                            onchange="chinhCuongDoTempt()" id="nutchinhcuongdotempt" value=""> <label
+                            id="newcuongdotempt" style="color:blue;font-weight:800; font-size: larger" for=""></label>
+                        </div>
                         <div class="" style="padding: 5%;">
-                          <button type="submit" class="btn btn-success">Submit</button>
-                          <div type="submit" class="btn btn-danger" onclick="hideFormEditLimit()">Hủy</div>
+                          <div type="" class="btn btn-success" onclick="submitgioihan()">Submit</div>
+                          <div type="" class="btn btn-danger" id="nuthuychinhformgioihan" onclick="hideFormEditLimit()">Hủy</div>
                         </div>
 
 
@@ -254,7 +259,7 @@
                       var trangthai =  <%= data.trangthai %>;
                       var cuongdo =  <%= data.value %>;
                       //Chỉnh cường độ khi mở trang
-                       $('#giatricuongdo').val(cuongdo);
+                      $('#giatricuongdo').val(cuongdo);
                       $('#newcuongdo').html(`${cuongdo}`);
 
 
@@ -299,11 +304,19 @@
 
                         $('#newcuongdo').html(`${cuongdo}`);
                       }
+                      //Hiệu chỉnh cường độ
+                      function chinhCuongDoTempt() {
+                        var cuongdo = $('#giatricuongdotempt').val();
+
+
+                        $('#newcuongdotempt').html(`${cuongdo}`);
+                      }
                       //Hiển thị form chỉnh giới hạn nhiệt độ
                       function hideFormEditLimit() {
-                        
+                        $('#nuthuychinhformgioihan').html("Hủy");
+
                         $('.bom').toggle(500)
-                            $('.themgiohannhietdo').toggle(500);
+                        $('.themgiohannhietdo').toggle(500);
                       }
                       function showFormEditLimit() {
 
@@ -311,22 +324,26 @@
                         $.ajax({
                           type: 'post',
                           url: '/checkgiohanstatus',
-                          data: { },
+                          data: {},
                           success: function (result) {
-                            if(result[1] == 'khonghieuluc' ){
+                            if (result[1] == 'khonghieuluc') {
                               $('#gioihanduoi').val(result[0].gioihanduoi);
                               $('#gioihantren').val(result[0].gioihantren);
                               $('#trangthaigioihannhietdo').html("Giới hạn hiện tại không có hiệu lực")
-                              $('#trangthaigioihannhietdo').css("color","red")
-                              $('#trangthaigioihannhietdo').css("font-weight","600")
+                              $('#trangthaigioihannhietdo').css("color", "red")
+                              $('#trangthaigioihannhietdo').css("font-weight", "600")
 
-                              $('#formtrangthaigioihannhietdo').css("border","2px solid red")
-                              console.log('khonghieuluc');
-                            } else if(result[1] == 'cohieuluc') {
+                              $('#formtrangthaigioihannhietdo').css("border", "2px solid red")
+                             $('#giatricuongdotempt').val(result[0].value);
+                              $('#newcuongdotempt').html(result[0].value);
+
+                            } else if (result[1] == 'cohieuluc') {
                               $('#gioihanduoi').val(result[0].gioihanduoi);
                               $('#gioihantren').val(result[0].gioihantren);
-                              console.log('cohieuluc');
-                              $('#formtrangthaigioihannhietdo').css("border","2px solid #45bfb4")
+
+                              $('#formtrangthaigioihannhietdo').css("border", "2px solid #45bfb4")
+                             $('#giatricuongdotempt').val(result[0].value);
+                              $('#newcuongdotempt').html(`${result[0].value}`);
 
                             } else {
 
@@ -344,12 +361,57 @@
 
                         return false;
                       }
-                      //Bật bơm
-                      function batBom() {
-                        var cuongdo = $('#giatricuongdo').val()
+
+                      //Gửi giới hạn
+                      function submitgioihan() {
+                        var gioihantren = $('#gioihantren').val()
+                        var gioihanduoi = $('#gioihanduoi').val()
+                        var cuongdo = $('#giatricuongdotempt').val()
                         $.ajax({
                           type: 'post',
-                          url: '/batbom',
+                          url: '/getlimit',
+                          data: { up: gioihantren, down: gioihanduoi, cuongdo: cuongdo },
+                          success: function (result) {
+                            if (result == 'success') {
+                              $('#trangthaigioihannhietdo').html("")
+                              $('#formtrangthaigioihannhietdo').css("border", "2px solid #45bfb4")
+                              $("#status").html("Thiết lập thành công");
+                              $('#nuthuychinhformgioihan').html("Back");
+                              myVar = setTimeout(function name(params) {
+                                $("#status").html("");
+
+                              }, 3000);
+                            } else if (result == "wrongnumber") {
+                              $("#status").html("Khoảng cách nhiệt độ phải lớn hơn 1");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            } else {
+                              $("#status").html("Thiết lập thất bại");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            }
+                            return false;
+
+                          }
+                        });
+                      }
+
+                      //Bật bơm
+                      function batBom() {
+                        var cuongdo = $('#giatricuongdo').val();
+                        $.ajax({
+                          type: 'post',
+                          url: 'batbom',
                           data: { cuongdo: cuongdo },
                           success: function (result) {
                             if (result == 'success') {
