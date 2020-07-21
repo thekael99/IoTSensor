@@ -4,21 +4,24 @@
 <head>
   <%- include("function/header.ejs") %>
   <style>
-    .card-header h6{
+    .card-header h6 {
       text-align: center;
     }
-    .themgiohannhietdo{
-      justify-content:center;
+
+    .themgiohannhietdo {
+      justify-content: center;
       text-align: center;
       padding-bottom: 5%;
     }
-    .themgiohannhietdo form{
-      width:200px;
-      margin:auto;
+
+    .themgiohannhietdo form {
+      width: 200px;
+      margin: auto;
       border: 2px solid #45bfb4;
       border-radius: 10%;
       padding: 2%;
     }
+
     #hinhtronbom {
       width: 350px;
       height: 350px;
@@ -178,7 +181,7 @@
                 </div>
               </div>
               <!-- Donut Chart -->
-              <div class="col-5" >
+              <div class="col-5">
                 <div class="card shadow mb-4" style="height: 447px;">
                   <!-- Card Header - Dropdown -->
                   <div class="card-header py-3">
@@ -187,104 +190,272 @@
                   <!-- Card Body -->
                   <div class="card-body">
                     <div class="themgiohannhietdo" style="display:none">
-
-                      <form action="/getlimit" method="post">
+                      <p id="trangthaigioihannhietdo"></p>
+                      <form id="formtrangthaigioihannhietdo" action="/getlimit" method="post">
                         <h1> <%= status %> </h1>
                         <label for="">Giới hạn nhiệt độ trên</label>
-                        <input type="text" name="up" class="form-control" placeholder="Enter tempt"
+                        <input type="text" id="gioihantren" name="up" class="form-control" placeholder="Enter tempt"
                           value="<%= obj.gioihantren %>">
                         <label for="">Giới hạn nhiệt độ dưới</label>
-                        <input type="text" name="down" class="form-control" placeholder="Enter tempt"
+                        <input type="text" name="down" id="gioihanduoi" class="form-control" placeholder="Enter tempt"
                           value="<%= obj.gioihanduoi %>">
-                        <button type="submit" class="btn btn-success">Submit</button>
-                        <div type="submit" class="btn btn-danger" onclick="showFormEditLimit()">Hủy</div>
+                        <div class="" style="padding: 5%;">
+                          <button type="submit" class="btn btn-success">Submit</button>
+                          <div type="submit" class="btn btn-danger" onclick="hideFormEditLimit()">Hủy</div>
+                        </div>
+
 
                       </form>
-                      
-                 
+
+
                     </div>
                     <div class="bom">
 
                       <div class="col-xl-12 col-lg-12" id="hinhtronbom">
                         <div class="contentpump">
-                          <h4>Trạng thái   </h4>
+                          <h4 style="color: black;">Trạng thái </h4>
                           <div id="motor">
-                            
+
                           </div>
-                          
-                          <form action="/momotor" method="post">
+
+                          <form class="" method="post">
                             <div class="slidecontainer">
-                              <p id="cuongdo">Cường độ: </p>
-                              <input type="range" min="1" max="100" onchange="chinhCuongDo()" id="nutchinhcuongdo" value="">
+                              <p id="cuongdo">Cường độ: <%= data.value %> </p>
+                              <input type="range" min="1" max="100" id="giatricuongdo" name="cuongdo"
+                                onchange="chinhCuongDo()" id="nutchinhcuongdo" value="<%= data.value %>"> <label
+                                id="newcuongdo" style="color:blue;font-weight:800; font-size: larger" for="">30</label>
                             </div>
                             <div class="row">
                               <div class="col-12">
-                                <button class="btn btn-success " type="submit">Mở</button>
-                                <button class="btn btn-danger "  type="">Tắt</button>
+                                <div class="btn btn-success " onclick="batBom()" type="">Mở</div>
+                                <div class="btn btn-danger " onclick="tatBom()" type="">Tắt</div>
                               </div>
-                             
-                              <div class="col-12" style="padding-top: 2%;">
-                                <div class="btn btn-primary " onclick="showFormEditLimit()" type="">Chỉnh giới hạn</div>
+
+                              <div class=" col-12" style="padding-top: 2%;">
+                                <div class="btn btn-primary " onclick="showFormEditLimit()" type="">Chỉnh giới hạn
+                                </div>
                               </div>
                             </div>
-                           
+
 
                           </form>
                         </div>
 
 
                       </div>
-                    
+
 
                     </div>
 
 
-                  
+
 
                     <script>
                       var trangthai =  <%= data.trangthai %>;
+                      var cuongdo =  <%= data.value %>;
+                      //Chỉnh cường độ khi mở trang
+                       $('#giatricuongdo').val(cuongdo);
+                      $('#newcuongdo').html(`${cuongdo}`);
+
+
                       function myTimer() {
                         $.get("http://localhost:3000/apimotor", function (data, status) {
 
                           trangthai = data[0].trangthai;
+                          cuongdo = data[0].value;
+
+                          myFunction(trangthai, cuongdo);
 
 
-                          if (trangthai == 1) {
-                            document.getElementById("motor").innerHTML = "Bơm đang chạy";
 
-                          } else {
-                            document.getElementById("motor").innerHTML = "Bơm đang dừng";
+                        });
+                      }
+                      function myFunction(trangthai, cuongdo) {
+                        if (trangthai == 1) {
+                          document.getElementById("motor").innerHTML = "Bơm đang chạy";
+                          $('#motor').css("color", "green");
+                          $('#motor').css("font-weight", "700");
+                          $('#hinhtronbom').css("border", "10px solid #5af490");
+                          $('#cuongdo').html(`Cường độ: ${cuongdo}`);
+
+                        } else {
+                          document.getElementById("motor").innerHTML = "Bơm đang Tắt";
+                          $('#motor').css("color", "red");
+                          $('#motor').css("font-weight", "700");
+                          $('#hinhtronbom').css("border", "10px solid red");
+                          $('#cuongdo').html(`Cường độ: ${cuongdo}`);
+
+                        }
+
+                      }
+                      //Hiệu chỉnh trạng thái
+                      myFunction(trangthai, cuongdo);
+                      var myVar = setInterval(myTimer, 1000);
+
+                      //Hiệu chỉnh cường độ
+                      function chinhCuongDo() {
+                        var cuongdo = $('#giatricuongdo').val();
+
+
+                        $('#newcuongdo').html(`${cuongdo}`);
+                      }
+                      //Hiển thị form chỉnh giới hạn nhiệt độ
+                      function hideFormEditLimit() {
+                        
+                        $('.bom').toggle(500)
+                            $('.themgiohannhietdo').toggle(500);
+                      }
+                      function showFormEditLimit() {
+
+
+                        $.ajax({
+                          type: 'post',
+                          url: '/checkgiohanstatus',
+                          data: { },
+                          success: function (result) {
+                            if(result[1] == 'khonghieuluc' ){
+                              $('#gioihanduoi').val(result[0].gioihanduoi);
+                              $('#gioihantren').val(result[0].gioihantren);
+                              $('#trangthaigioihannhietdo').html("Giới hạn hiện tại không có hiệu lực")
+                              $('#trangthaigioihannhietdo').css("color","red")
+                              $('#trangthaigioihannhietdo').css("font-weight","600")
+
+                              $('#formtrangthaigioihannhietdo').css("border","2px solid red")
+                              console.log('khonghieuluc');
+                            } else if(result[1] == 'cohieuluc') {
+                              $('#gioihanduoi').val(result[0].gioihanduoi);
+                              $('#gioihantren').val(result[0].gioihantren);
+                              console.log('cohieuluc');
+                              $('#formtrangthaigioihannhietdo').css("border","2px solid #45bfb4")
+
+                            } else {
+
+                            }
+
+
+                            $('.bom').toggle(500)
+                            $('.themgiohannhietdo').toggle(500);
+
+
+                          }
+                        });
+
+
+
+                        return false;
+                      }
+                      //Bật bơm
+                      function batBom() {
+                        var cuongdo = $('#giatricuongdo').val()
+                        $.ajax({
+                          type: 'post',
+                          url: '/batbom',
+                          data: { cuongdo: cuongdo },
+                          success: function (result) {
+                            if (result == 'success') {
+                              $('#giatricuongdo').val(cuongdo);
+                              $('#newcuongdo').html(cuongdo);
+                              $("#status").html("Bật bơm thành công");
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+                            } else if (result == "cuongdosai") {
+                              $("#status").html("Cường độ phải lớn hơn 0");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            } else {
+                              $("#status").html("Bật bơm thất bại");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            }
+                            return false;
+
                           }
                         });
                       }
-                      function myFunction(trangthai) {
-                        if (trangthai == 1) {
-                          document.getElementById("motor").innerHTML = "Bơm đang chạy";
-                          $('#motor').css("color","green");
-                          $('#motor').css("font-weight","700");
-                          $('#hinhtronbom').css("border","10px solid #5af490")
-                        } else {
-                          document.getElementById("motor").innerHTML = "Bơm đang dừng";
-                          $('#motor').css("color","red");
-                          $('#motor').css("font-weight","700");
-                          $('#hinhtronbom').css("border","10px solid red")
+                      //Tắt bơm
+                      function tatBom() {
+                        var cuongdo = $('#giatricuongdo').val()
+                        console.log(cuongdo);
+                        $.ajax({
+                          type: 'post',
+                          url: '/tatbom',
+                          data: { cuongdo: cuongdo },
+                          success: function (result) {
+                            if (result == 'success') {
+                              $('#giatricuongdo').val(0);
 
-                        }
-                      }
-                      //Hiệu chỉnh trạng thái
-                      myFunction(trangthai);
-                      var myVar = setInterval(myTimer, 2000);
-                      function chinhCuongDo() {
-                       var cuongdo =  $('#nutchinhcuongdo').val();
-                       console.log(cuongdo);
 
-                       $('#cuongdo').html(`Cường độ: ${cuongdo}`);
+                              $('#newcuongdo').html(0);
+                              $("#status").html("Tắt bơm thành công");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+                            } else {
+                              $("#status").html("Tắt bơm thất bại");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            }
+                            return false;
+
+                          }
+                        });
                       }
-                      //Hiển thị form chỉnh giới hạn nhiệt độ
-                      function showFormEditLimit() {
-                        $('.bom').toggle(500)
-                        $('.themgiohannhietdo').toggle(500);
-                        return false;
+                      //Gửi giới hạn nhiệt độ 
+                      function tatBom() {
+                        var cuongdo = $('#giatricuongdo').val()
+                        console.log(cuongdo);
+                        $.ajax({
+                          type: 'post',
+                          url: '/tatbom',
+                          data: { cuongdo: cuongdo },
+                          success: function (result) {
+                            if (result == 'success') {
+                              $('#giatricuongdo').val(0);
+
+
+                              $('#newcuongdo').html(0);
+                              $("#status").html("Tắt bơm thành công");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+                            } else {
+                              $("#status").html("Tắt bơm thất bại");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
+                            }
+                            return false;
+
+                          }
+                        });
                       }
                     </script>
                   </div>

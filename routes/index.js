@@ -20,7 +20,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "30041999",
+  password: "admin123",
   port: "3306",
   database: "iot"
 });
@@ -138,7 +138,7 @@ client.on('message', (topicMotor, message) => {
   if (message.device_id == 'Speaker') {
 
     //Ket noi
-    var insert = `INSERT INTO Motor (device,trangthai,value,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `
+    var insert = `INSERT INTO Motor (device,trangthai,value,thoigian) values ('${message.device_id}','${message.values[0]}',${message.values[1]},'${d}') `
 
     con.query(insert, function (err, result, fields) {
       if (err) throw err;
@@ -185,7 +185,7 @@ router.get('/apinhietdo', function (req, res, next) {
 router.get('/apigioihannhietdo', function (req, res, next) {
   // var select = `SELECT * FROM CamBien where idCamBien `;
   var select = `
-  SELECT * FROM iot.LIMITTEMPT where id = (select max(id) from iot.LIMITTEMPT);`
+  SELECT * FROM iot.Gioihannhietdo where id = (select max(id) from iot.Gioihannhietdo);`
   con.query(select, function (err, result, fields) {
     if (err) throw err;
     res.send(result);
@@ -205,7 +205,7 @@ router.get('/detrong', function (req, res, next) {
     result.forEach(element => {
       nhietdo.push(element.nhietdo);
       doam.push(element.doam);
-      
+
       label.push(`'${element.thoigian.slice(15, 24)}'`);
 
     });
@@ -216,7 +216,7 @@ router.get('/detrong', function (req, res, next) {
   });
 });
 /* GET Trang thai motor. */
-router.get('/bieudonhietdo', function (req, res, next) {
+router.use('/bieudonhietdo', function (req, res, next) {
   status = "";
   var obj = {
     "gioihantren": "chuaxacdinh",
@@ -224,7 +224,7 @@ router.get('/bieudonhietdo', function (req, res, next) {
   }
   var data;
   //lay gioi han nhiet do
-  var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select max(id) from iot.LIMITTEMPT); `;
+  var selectdblimit = `SELECT * FROM iot.Gioihannhietdo where id = (select max(id) from iot.Gioihannhietdo where gioihantren != 999 and gioihanduoi != 999); `;
   con.query(selectdblimit, function (err, result, obj) {
     if (err) {
       console.log(err)
@@ -241,7 +241,7 @@ router.get('/bieudonhietdo', function (req, res, next) {
         } else {
 
           data = result[0];
-          console.log(data);
+
           res.render('bieudonhietdo', { title: 'Express', data: data, obj: obj, status: status });
 
         }
@@ -262,17 +262,36 @@ router.get('/apimotor', function (req, res, next) {
   });
 });
 /* Tắt motor*/
-router.post('/tatmotor', function (req, res, next) {
+router.use('/tatbom', function (req, res, next) {
+  console.log(req.body);
+  var username = req.cookies.info.username;
   // MQTT publisher
   var client = mqtt.connect(ip)
   var topic = 'Topic/Speaker'
-  var message = [{ "device_id": "Speaker", "values": ["0", "80"] }]
+  // var message = 'Hello tempt! 1'
+  var message = [{ "device_id": "Speaker", "values": ["0", "0"] }]
   var mess = JSON.stringify(message);
   client.on('connect', () => {
 
     client.publish(topic, mess);
-    console.log('Message off motor sent!',)
-    res.redirect('/trangthaimotor');
+    console.log('Message on motor sent!',)
+
+    var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,'${d}','${username}')`;
+    con.query(sql, function (err, result, fields) {
+      if (err) throw err;
+      else {
+        var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(0,0,'${d}','Speaker',0,'${username}')`;
+        con.query(sql, function (err, result, fields) {
+          if (err) throw err;
+          else {
+            res.send('success');
+
+          }
+        }
+        )
+      }
+
+    });
 
   })
 
@@ -280,27 +299,53 @@ router.post('/tatmotor', function (req, res, next) {
 
 });
 /* Mở motor*/
-router.post('/momotor', function (req, res, next) {
-  // MQTT publisher
-  var client = mqtt.connect(ip)
-  var topic = 'Topic/Speaker'
-  // var message = 'Hello tempt! 1'
-  var message = [{ "device_id": "Speaker", "values": ["1", "80"] }]
-  var mess = JSON.stringify(message);
-  client.on('connect', () => {
+router.use('/batbom', function (req, res, next) {
 
-    client.publish(topic, mess);
-    console.log('Message on motor sent!',)
-    res.redirect('/trangthaimotor');
+  var cuongdo = Number.parseInt(req.body.cuongdo);
+  console.log(cuongdo);
+  if (cuongdo != 0) {
+    var username = req.cookies.info.username;
+    // MQTT publisher
+    var client = mqtt.connect(ip)
+    var topic = 'Topic/Speaker'
+    // var message = 'Hello tempt! 1'
+    var message = [{ "device_id": "Speaker", "values": ["1", `"${cuongdo}"`] }]
+    var mess = JSON.stringify(message);
+    client.on('connect', () => {
 
-  })
+      client.publish(topic, mess);
+      console.log('Message on motor sent!',)
+
+      var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,'${d}','${username}')`;
+      con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        else {
+          var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(1,${cuongdo},'${d}','Speaker',0,'${username}')`;
+          console.log(sql);
+          con.query(sql, function (err, result, fields) {
+            if (err) throw err;
+            else {
+              res.send('success');
+
+            }
+          }
+          )
+        }
+
+      });
+
+    })
+  } else {
+    res.send('cuongdosai');
+  }
+
 
   //1883
 
 });
 
 /* POSt giá trị giới hạn hiện tại*/
-router.post('/getlimit', function (req, res, next) {
+router.use('/getlimit', function (req, res, next) {
   var up = req.body.up;
   var down = req.body.down;
   var status;
@@ -318,7 +363,7 @@ router.post('/getlimit', function (req, res, next) {
       } else {
         data = result[0];
 
-        var select = `insert into iot.LIMITTEMPT (gioihantren, gioihanduoi, timecreate) values(${up},${down},'${d}')`;
+        var select = `insert into iot.Gioihannhietdo (gioihantren, gioihanduoi, timecreate) values(${up},${down},'${d}')`;
         con.query(select, function (err, result) {
           if (err) {
             console.log(err);
@@ -342,7 +387,7 @@ router.post('/getlimit', function (req, res, next) {
     }
     var data;
     //lay gioi han nhiet do
-    var selectdblimit = `SELECT * FROM iot.LIMITTEMPT where id = (select Max(id) from iot.Motor); `;
+    var selectdblimit = `SELECT * FROM iot.Gioihannhietdo where id = (select Max(id) from iot.Motor); `;
     con.query(selectdblimit, function (err, result, obj) {
       if (err) {
         console.log(err)
@@ -374,6 +419,37 @@ router.post('/getlimit', function (req, res, next) {
 
 
 })
+/* GET Dang ki page. */
+router.use('/checkgiohanstatus', function name(req, res, next) {
+  var selectdblimit = `SELECT * FROM iot.Gioihannhietdo where id = (select max(id) from iot.Gioihannhietdo ); `;
+  con.query(selectdblimit, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      if ((result[0].gioihantren == 999) && (result[0].gioihanduoi == -999)) {
+        var selectdblimit = `SELECT * FROM iot.Gioihannhietdo where id = (select max(id) from iot.Gioihannhietdo where  gioihantren != 999 and gioihanduoi != 999); `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+
+            ketqua.push('khonghieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+      } else {
+        var ketqua = result;
+
+        ketqua.push('khonghieuluc');
+
+        res.send(ketqua)
+      }
+    }
+  })
+});
 /* GET Dang ki page. */
 router.get('/dangki', controller.dangki);
 /* POST home page. */
