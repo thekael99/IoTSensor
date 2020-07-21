@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <%- include("function/header.ejs") %>
+  <style>
+
+  </style>
+</head>
+
+<body>
+
+  <body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper" style="width: 100%;">
+
+      <!-- Sidebar -->
+      <%- include("function/menubar.ejs") %>
+
+      <!-- End of Sidebar -->
+
+      <!-- Content Wrapper -->
+      <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+          <!-- Topbar -->
+          <%- include("function/navbar.ejs") %>
+
+          <!-- End of Topbar -->
+
+          <!-- Begin Page Content -->
+          <div class="container-fluid">
+
+            <!-- Page Heading -->
+            <h1 class="h3 mb-2 text-gray-800">Trang thống kê</h1>
+
+
+            <!-- Content Row -->
+            <div class="row">
+
+              <div class="col-xl-12 col-12" style="width: 600px;">
+
+                <!-- mychart   -->
+                <!-- Area Chart -->
+                <div class="card shadow col-12">
+                  <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Biểu đồ</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row" style="justify-content: center;">
+                      <div class="hienthitheongay" style="margin-right: 5%">
+                        <div class="btn btn-primary" for="" onclick="chonngay()">Hiển thị theo ngày</div>
+                        <input style="display: none;" type="date" id="chonngay" onchange="hienthiheongay()" name="ngay">
+
+                      </div>
+                      <div class="hienthitheothang" style="margin-right: 5%">
+                        <div class="btn btn-primary" for="" onclick="chonthang()">Hiển thị theo tháng</div>
+                        <input style="display: none;" type="month" id="chonthang" name="thang">
+                      </div>
+                      <div class="hienthitheonam" style="margin-right: 5%">
+                        <div class="btn btn-primary" for="" onclick="chonnam()">Hiển thị theo năm</div>
+                        <input style="display: none;" type="number" id="chonnam" min="2020" max="2120" value="2020"
+                          name="nam">
+                      </div>
+                    </div>
+                    <div class="chart-area">
+                      <canvas id="myChart"></canvas>
+                    </div>
+                    <hr>
+                  </div>
+                </div>
+              </div>
+              <!-- Donut Chart -->
+              <script>
+                function hienthiheongay() {
+
+                  var data = { data: $('#chonngay').val() }
+                  $.ajax({
+                    url: '/laydulieuthongke',
+                    type: 'post',
+                    data: data,
+                    success: function (data) {
+                      var nhietdo = [];
+                      var label = [];
+                      var doam = [];
+
+                      data.forEach(element => {
+                        nhietdo.push(element.nhietdo);
+                        doam.push(element.doam);
+
+                        label.push(element.thoigian.slice(15, 24));
+
+                        
+                      });
+                    
+
+
+                      myChart.destroy();
+                      var ctx = document.getElementById('myChart').getContext('2d');
+
+                      var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                          labels: label,
+                          datasets: [
+                            {
+                              label: "Nhiệt độ",
+                              fill: true,
+                              backgroundColor: 'rgb(190, 99, 255, 0.25)',
+                              borderColor: 'rgb(190, 99, 255)',
+                              data: nhietdo,
+                            },
+                            {
+                              label: "Độ ẩm",
+                              fill: false,
+                              backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                              borderColor: 'rgb(255, 99, 132)',
+                              data: doam,
+                            }
+                          ]
+                        }
+                      }
+                      );
+
+
+
+
+                    }
+                  })
+
+                }
+                function chonngay() {
+                  $('#chonngay').toggle(500);
+                  $('#chonthang').hide(500);
+                  $('#chonnam').hide(500);
+                  $('#xacnhanchonngay').toggle(500);
+
+                }
+                function chonthang() {
+                  $('#chonthang').toggle(500);
+                  $('#chonngay').hide(500);
+                  $('#chonnam').hide(500);
+                }
+                function chonnam() {
+                  $('#chonnam').toggle(500);
+                  $('#chonngay').hide(500);
+                  $('#chonthang').hide(500);
+                }
+              </script>
+
+            </div>
+            <!-- /.container-fluid -->
+
+          </div>
+          <!-- End of Main Content -->
+
+
+          <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+      </div>
+      <!-- End of Page Wrapper -->
+
+      <!-- Scroll to Top Button-->
+      <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+      </a>
+
+      <!-- Logout Modal-->
+      <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+              <a class="btn btn-primary" href="login.html">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        var nhietdo = [];
+        var label = [];
+        var doam = [];
+        function myTimer() {
+          var nhietdo = [];
+          var label = [];
+          var doam = [];
+
+
+
+
+
+
+
+
+          data.forEach(element => {
+            nhietdo.push(element.nhietdo);
+            doam.push(element.doam);
+
+            label.push(element.thoigian.slice(15, 24));
+
+            //     myChart.data.labels.push(element.device);
+            //     myChart.data.datasets.forEach((dataset) => {
+            // dataset.data.push(element.nhietdo);
+          });
+          //   myChart.data.labels = label;
+
+
+
+          myChart.destroy();
+          var ctx = document.getElementById('myChart').getContext('2d');
+
+          var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: label,
+              datasets: [
+                {
+                  label: "Nhiệt độ",
+                  fill: true,
+                  backgroundColor: 'rgb(190, 99, 255, 0.25)',
+                  borderColor: 'rgb(190, 99, 255)',
+                  data: nhietdo,
+                },
+                {
+                  label: "Độ ẩm",
+                  fill: false,
+                  backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                  borderColor: 'rgb(255, 99, 132)',
+                  data: doam,
+                }
+              ]
+            }
+          }
+          );
+
+        }
+
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: label,
+            datasets: [
+              {
+                label: "Nhiệt độ",
+                fill: true,
+                backgroundColor: 'rgb(190, 99, 255, 0.25)',
+                borderColor: 'rgb(190, 99, 255)',
+                data: nhietdo,
+              },
+              {
+                label: "Độ ẩm",
+                fill: false,
+                backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: doam,
+              }
+            ]
+          }
+        }
+        );
+
+
+      </script>
+      <!-- Bootstrap core JavaScript-->
+      <script src="vendor/jquery/jquery.min.js"></script>
+      <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+      <!-- Core plugin JavaScript-->
+      <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+      <!-- Custom scripts for all pages-->
+      <script src="js/sb-admin-2.min.js"></script>
+  </body>
+
+</html>

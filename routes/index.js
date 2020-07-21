@@ -73,7 +73,7 @@ client.on('message', (topicSensor, message) => {
     if (message.device_id == 'TempHumi ') {
 
       //them vao db
-      var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}','${d}') `;
+      var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}',now()) `;
       var run = con.query(insert);
       if (message.values[0] > limit.data[0].gioihantren) {
         //On motor
@@ -94,7 +94,7 @@ client.on('message', (topicSensor, message) => {
 
 
         })
-        var insertGiatribomkhigioihannhietdomo = `insert into Motor(trangthai,value,thoigian,device,auto,idcambien) values(1,${cuongdo},'${d}','Speaker','1',${limit.data[0].id} )`;
+        var insertGiatribomkhigioihannhietdomo = `insert into Motor(trangthai,value,thoigian,device,auto,idcambien) values(1,${cuongdo},now(),'Speaker','1',${limit.data[0].id} )`;
         console.log(insertGiatribomkhigioihannhietdomo);
         var insertbangmotor = con.query(insertGiatribomkhigioihannhietdomo);
       } else if (message.values[0] < limit.data[0].gioihanduoi) {
@@ -112,7 +112,7 @@ client.on('message', (topicSensor, message) => {
 
 
         })
-        var insertGiatribomkhigioihannhietdotat = `insert into Motor(trangthai,value,thoigian,device,auto,idcambien) values(0,0,'${d}','Speaker','1',${limit.data[0].id} )`;
+        var insertGiatribomkhigioihannhietdotat = `insert into Motor(trangthai,value,thoigian,device,auto,idcambien) values(0,0,now(),'Speaker','1',${limit.data[0].id} )`;
         console.log(insertGiatribomkhigioihannhietdotat);
 
         var insertbangmotor = con.query(insertGiatribomkhigioihannhietdotat);
@@ -146,7 +146,7 @@ client.on('message', (topicMotor, message) => {
   // if (message.device_id == 'Speaker') {
 
   //   //Ket noi
-  //   var insert = `INSERT INTO Motor (device,trangthai,value,thoigian) values ('${message.device_id}','${message.values[0]}',${message.values[1]},'${d}') `
+  //   var insert = `INSERT INTO Motor (device,trangthai,value,thoigian) values ('${message.device_id}','${message.values[0]}',${message.values[1]},now()) `
 
   //   con.query(insert, function (err, result, fields) {
   //     if (err) throw err;
@@ -182,7 +182,7 @@ router.get('/apinhietdo', function (req, res, next) {
   // var select = `SELECT * FROM CamBien where idCamBien `;
   var select = `
  SELECT * FROM (
-    SELECT * FROM iot.CamBien ORDER BY idCAmbien DESC LIMIT 10
+    SELECT * FROM iot.CamBien ORDER BY idCAmbien DESC LIMIT 30
  )Var1
     ORDER BY idCamBien ASC;`
   con.query(select, function (err, result, fields) {
@@ -293,11 +293,11 @@ router.use('/tatbom', function (req, res, next) {
     client.publish(topic, mess);
     console.log('Message on motor sent!',)
 
-    var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,'${d}','${username}')`;
+    var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,now(),'${username}')`;
     con.query(sql, function (err, result, fields) {
       if (err) console.log(err);
       else {
-        var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(0,0,'${d}','Speaker',0,'${username}')`;
+        var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(0,0,now(),'Speaker',0,'${username}')`;
         con.query(sql, function (err, result, fields) {
           if (err) console.log(err);
           else {
@@ -332,11 +332,11 @@ router.use('/batbom', function (req, res, next) {
       client.publish(topic, mess);
       console.log('Message on motor sent!',)
 
-      var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,'${d}','${username}')`;
+      var sql = `insert into Gioihannhietdo(gioihantren,gioihanduoi,timecreate,username) values(999,-999,now(),'${username}')`;
       con.query(sql, function (err, result, fields) {
         if (err) throw err;
         else {
-          var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(1,${cuongdo},'${d}','Speaker',0,'${username}')`;
+          var sql = `insert into Motor(trangthai,value,thoigian,device,auto,username) values(1,${cuongdo},now(),'Speaker',0,'${username}')`;
           con.query(sql, function (err, result, fields) {
             if (err) throw err;
             else {
@@ -380,7 +380,7 @@ router.use('/getlimit', function (req, res, next) {
       } else {
         data = result[0];
 
-        var select = `insert into iot.Gioihannhietdo (gioihantren, gioihanduoi, timecreate, username) values(${up},${down},'${d}','${username}')`;
+        var select = `insert into iot.Gioihannhietdo (gioihantren, gioihanduoi, timecreate, username) values(${up},${down},now(),'${username}')`;
         con.query(select, function (err, result) {
           if (err) {
             console.log(err);
@@ -479,6 +479,90 @@ router.use('/checkgiohanstatus', function name(req, res, next) {
       }
     }
   })
+});
+/* Lấy giới hạn hiện tại. */
+router.use('/hienthibieudo', function name(req, res, next) {
+  var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
+  con.query(selectdblimit, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      if ((result[0].gioihantren == 999) && (result[0].gioihanduoi == -999)) {
+        var selectdblimit = ` SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo where  gioihantren != 999 and gioihanduoi != 999) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+         
+            ketqua.push('khonghieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+      } else {
+        var selectdblimit = `SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+           
+            ketqua.push('cohieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+
+      }
+    }
+  })
+});
+/* Lấy giới hạn hiện tại. */
+router.use('/laydulieuthongke', function name(req, res, next) {
+  var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
+  con.query(selectdblimit, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      if ((result[0].gioihantren == 999) && (result[0].gioihanduoi == -999)) {
+        var selectdblimit = ` SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo where  gioihantren != 999 and gioihanduoi != 999) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+         
+            ketqua.push('khonghieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+      } else {
+        var selectdblimit = `SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+           
+            ketqua.push('cohieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+
+      }
+    }
+  })
+});
+/* GET Dang ki page. */
+router.get('/thongke',function(req,res,next){
+  res.render('thongke');
 });
 /* GET Dang ki page. */
 router.get('/dangki', controller.dangki);
