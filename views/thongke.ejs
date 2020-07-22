@@ -35,7 +35,7 @@
           <div class="container-fluid">
 
             <!-- Page Heading -->
-            <h1 class="h3 mb-2 text-gray-800">Trang thống kê</h1>
+            <h1 class="h3 mb-2 text-gray-800" style="text-align: center;">Trang thống kê</h1>
 
 
             <!-- Content Row -->
@@ -173,7 +173,7 @@
                 doam.push(element.doam);
 
                 label.push(element.thoigian)
-                
+
               });
               myChart.data.datasets[0].data = nhietdo;
               myChart.data.datasets[1].data = doam;
@@ -183,12 +183,16 @@
                   xAxes: [{
                     ticks: {
                       callback: function (tick, index, array) {
-                       
-                     
-                            return tick.slice(11)
-                       
-                          
+
+
+                        return tick.slice(11)
+
+
                       }
+                    }
+                  }], yAxes: [{
+                    ticks: {
+                      beginAtZero: true
                     }
                   }]
                 }
@@ -236,13 +240,17 @@
                         }
                       }
                     }
+                  }], yAxes: [{
+                    ticks: {
+                      beginAtZero: true
+                    }
                   }]
                 }
               }
 
 
               myChart.update();
-             
+
 
 
 
@@ -278,20 +286,34 @@
               myChart.data.datasets[0].data = nhietdo;
               myChart.data.datasets[1].data = doam;
               myChart.data.labels = label;
-         
+
               myChart.options = {
                 scales: {
                   xAxes: [{
                     ticks: {
                       callback: function (tick, index, array) {
                         if (tick.length == 50) {
-                          return tick.slice(4, 11)
+                          if (index % 10 == 0) {
+                            return tick.slice(4, 11)
+
+                          } else {
+                            return ""
+                          }
 
                         } else {
-                          return tick.slice(5, 11)
+                          if (index % 10 == 0) {
+                            return tick.slice(5, 11)
+
+                          } else {
+                            return ""
+                          }
 
                         }
                       }
+                    }
+                  }], yAxes: [{
+                    ticks: {
+                      beginAtZero: true
                     }
                   }]
                 }
@@ -332,6 +354,14 @@
                 data: doam,
               }
             ]
+          }, options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
           }
         }
         );
