@@ -49,21 +49,27 @@
                   <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Biểu đồ</h6>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body" style="height: 650px;">
                     <div class="row" style="justify-content: center;">
                       <div class="hienthitheongay" style="margin-right: 5%">
                         <div class="btn btn-primary" for="" onclick="chonngay()">Hiển thị theo ngày</div>
-                        <input style="display: none;" type="date" id="chonngay" onchange="hienthiheongay()" name="ngay">
+                        <input style="display: none;" type="date" id="chonngay" name="ngay">
+                        <div class="btn btn-success" style="display: none;" id="submitchonngay"
+                          onclick="hienthitheongay()">Submit</div>
 
                       </div>
                       <div class="hienthitheothang" style="margin-right: 5%">
                         <div class="btn btn-primary" for="" onclick="chonthang()">Hiển thị theo tháng</div>
                         <input style="display: none;" type="month" id="chonthang" name="thang">
+                        <div class="btn btn-success" style="display: none;" id="submitchonthang"
+                          onclick="hienthitheothang()">Submit</div>
                       </div>
                       <div class="hienthitheonam" style="margin-right: 5%">
                         <div class="btn btn-primary" for="" onclick="chonnam()">Hiển thị theo năm</div>
                         <input style="display: none;" type="number" id="chonnam" min="2020" max="2120" value="2020"
                           name="nam">
+                        <div class="btn btn-success" style="display: none;" id="submitchonnam"
+                          onclick="hienthitheonam()">Submit</div>
                       </div>
                     </div>
                     <div class="chart-area">
@@ -75,79 +81,34 @@
               </div>
               <!-- Donut Chart -->
               <script>
-                function hienthiheongay() {
 
-                  var data = { data: $('#chonngay').val() }
-                  $.ajax({
-                    url: '/laydulieuthongke',
-                    type: 'post',
-                    data: data,
-                    success: function (data) {
-                      var nhietdo = [];
-                      var label = [];
-                      var doam = [];
-
-                      data.forEach(element => {
-                        nhietdo.push(element.nhietdo);
-                        doam.push(element.doam);
-
-                        label.push(element.thoigian.slice(15, 24));
-
-                        
-                      });
-                    
-
-
-                      myChart.destroy();
-                      var ctx = document.getElementById('myChart').getContext('2d');
-
-                      var myChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                          labels: label,
-                          datasets: [
-                            {
-                              label: "Nhiệt độ",
-                              fill: true,
-                              backgroundColor: 'rgb(190, 99, 255, 0.25)',
-                              borderColor: 'rgb(190, 99, 255)',
-                              data: nhietdo,
-                            },
-                            {
-                              label: "Độ ẩm",
-                              fill: false,
-                              backgroundColor: 'rgba(255, 99, 132, 0.25)',
-                              borderColor: 'rgb(255, 99, 132)',
-                              data: doam,
-                            }
-                          ]
-                        }
-                      }
-                      );
-
-
-
-
-                    }
-                  })
-
-                }
                 function chonngay() {
                   $('#chonngay').toggle(500);
                   $('#chonthang').hide(500);
                   $('#chonnam').hide(500);
                   $('#xacnhanchonngay').toggle(500);
+                  $('#submitchonnam').hide(500);
+                  $('#submitchonngay').toggle(500);
+                  $('#submitchonthang').hide(500);
+                  $('#submitchonnam').hide(500);
 
                 }
                 function chonthang() {
                   $('#chonthang').toggle(500);
                   $('#chonngay').hide(500);
                   $('#chonnam').hide(500);
+                  $('#submitchonnam').hide(500);
+                  $('#submitchonthang').toggle(500);
+                  $('#submitchonngay').hide(500);
+                  $('#submitchonnam').hide(500);
                 }
                 function chonnam() {
                   $('#chonnam').toggle(500);
                   $('#chonngay').hide(500);
                   $('#chonthang').hide(500);
+                  $('#submitchonnam').toggle(500);
+                  $('#submitchonngay').hide(500);
+                  $('#submitchonthang').hide(500);
                 }
               </script>
 
@@ -194,61 +155,160 @@
         var nhietdo = [];
         var label = [];
         var doam = [];
-        function myTimer() {
-          var nhietdo = [];
-          var label = [];
-          var doam = [];
+        //Hiển thị theo ngày
+        function hienthitheongay() {
 
+          var data = { data: $('#chonngay').val() }
 
+          $.ajax({
+            url: '/laydulieuthongke',
+            type: 'post',
+            data: data,
+            success: function (result) {
+              var nhietdo = [];
+              var label = [];
+              var doam = [];
+              result.forEach(element => {
+                nhietdo.push(element.nhietdo);
+                doam.push(element.doam);
 
-
-
-
-
-
-          data.forEach(element => {
-            nhietdo.push(element.nhietdo);
-            doam.push(element.doam);
-
-            label.push(element.thoigian.slice(15, 24));
-
-            //     myChart.data.labels.push(element.device);
-            //     myChart.data.datasets.forEach((dataset) => {
-            // dataset.data.push(element.nhietdo);
-          });
-          //   myChart.data.labels = label;
-
-
-
-          myChart.destroy();
-          var ctx = document.getElementById('myChart').getContext('2d');
-
-          var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: label,
-              datasets: [
-                {
-                  label: "Nhiệt độ",
-                  fill: true,
-                  backgroundColor: 'rgb(190, 99, 255, 0.25)',
-                  borderColor: 'rgb(190, 99, 255)',
-                  data: nhietdo,
-                },
-                {
-                  label: "Độ ẩm",
-                  fill: false,
-                  backgroundColor: 'rgba(255, 99, 132, 0.25)',
-                  borderColor: 'rgb(255, 99, 132)',
-                  data: doam,
+                label.push(element.thoigian)
+                
+              });
+              myChart.data.datasets[0].data = nhietdo;
+              myChart.data.datasets[1].data = doam;
+              myChart.data.labels = label;
+              myChart.options = {
+                scales: {
+                  xAxes: [{
+                    ticks: {
+                      callback: function (tick, index, array) {
+                       
+                     
+                            return tick.slice(11)
+                       
+                          
+                      }
+                    }
+                  }]
                 }
-              ]
+              }
+              myChart.update();
             }
-          }
-          );
+          })
+
+        }
+        //Hiển thị theo tháng
+        function hienthitheothang() {
+
+          var data = { data: $('#chonthang').val() }
+
+          $.ajax({
+            url: '/laydulieuthongke',
+            type: 'post',
+            data: data,
+            success: function (result) {
+              var nhietdo = [];
+              var label = [];
+              var doam = [];
+              result.forEach(element => {
+                nhietdo.push(element.nhietdo);
+                doam.push(element.doam);
+
+                label.push(element.thoigian)
+
+
+              });
+              myChart.data.datasets[0].data = nhietdo;
+              myChart.data.datasets[1].data = doam;
+              myChart.data.labels = label;
+              myChart.options = {
+                scales: {
+                  xAxes: [{
+                    ticks: {
+                      callback: function (tick, index, array) {
+                        if (tick.length == 50) {
+                          return tick.slice(4, 11)
+
+                        } else {
+                          return tick.slice(5, 11)
+
+                        }
+                      }
+                    }
+                  }]
+                }
+              }
+
+
+              myChart.update();
+             
+
+
+
+
+
+            }
+          })
 
         }
 
+        //Hiển thị theo năm
+        function hienthitheonam() {
+
+          var data = { data: $('#chonnam').val() }
+
+          $.ajax({
+            url: '/laydulieuthongke',
+            type: 'post',
+            data: data,
+            success: function (result) {
+              var nhietdo = [];
+              var label = [];
+              var doam = [];
+              result.forEach(element => {
+                nhietdo.push(element.nhietdo);
+                doam.push(element.doam);
+
+                label.push(element.thoigian)
+
+
+              });
+
+              myChart.data.datasets[0].data = nhietdo;
+              myChart.data.datasets[1].data = doam;
+              myChart.data.labels = label;
+         
+              myChart.options = {
+                scales: {
+                  xAxes: [{
+                    ticks: {
+                      callback: function (tick, index, array) {
+                        if (tick.length == 50) {
+                          return tick.slice(4, 11)
+
+                        } else {
+                          return tick.slice(5, 11)
+
+                        }
+                      }
+                    }
+                  }]
+                }
+              }
+
+              myChart.update();
+
+
+
+
+
+
+
+            }
+          })
+
+        }
 
         var ctx = document.getElementById('myChart').getContext('2d');
 
