@@ -20,7 +20,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "admin123",
+  password: "30041999",
   port: "3306",
   database: "iot"
 });
@@ -57,6 +57,17 @@ const ex = async () => {
   return limit;
 }
 
+const fs = require('fs');
+function readFile() {
+  const obj = [];
+  const data = fs.readFileSync('model', 'UTF-8');
+  const lines = data.split(/\r?\n/);
+  lines.forEach((line) => {
+    obj.push(parseFloat(line));
+  });
+  return obj;
+}
+arg = readFile()
 
 client.on('message', (topicSensor, message) => {
   message = JSON.parse(message)[0];
@@ -67,24 +78,24 @@ client.on('message', (topicSensor, message) => {
 
     limit = await axios.get('http://localhost:3000/apigioihannhietdo');
 
-
-
-
     if (message.device_id == 'TempHumi ') {
 
       //them vao db
       var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}',now()) `;
       var run = con.query(insert);
+      // console.log(message.values[1])
       if (message.values[0] > limit.data[0].gioihantren) {     //So sánh giới hạn
         //On motor
         // MQTT publisher
         var client = mqtt.connect(ip)
         var topic = 'Topic/Speaker'
         // var message = 'Hello tempt! 1'
+        useAI = true;
+        if (useAI == false)
+          cuongdo = limit.data[0].value;
+        else
+          cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
 
-
-
-        cuongdo = limit.data[0].value;
         var message = [{ "device_id": "Speaker", "values": ["1", `"${cuongdo}"`] }]
         var mess = JSON.stringify(message);
         client.on('connect', () => {
@@ -193,22 +204,25 @@ router.get('/apinhietdo', function (req, res, next) {
 /* API data gioi han nhiet do. */
 router.get('/apigioihannhietdo', function (req, res, next) {
   // var select = `SELECT * FROM CamBien where idCamBien `;
+
   var select = `
   SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ;`
   con.query(select, function (err, result, fields) {
     if (err) throw err;
-    if(result[0]){
+    if (result[0]) {
       res.send(result)
     } else {
       var select = `
       SELECT  *   FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo)  ;`
       con.query(select, function (err, result, fields) {
         if (err) throw err; res.send(result)
+        // console.log(result)
       })
     }
 
   });
 });
+
 //Bieu do
 router.get('/detrong', function (req, res, next) {
 
@@ -453,7 +467,7 @@ router.use('/checkgiohanstatus', function name(req, res, next) {
             console.log(err)
           } else {
             var ketqua = result;
-         
+
             ketqua.push('khonghieuluc');
 
             res.send(ketqua)
@@ -467,7 +481,7 @@ router.use('/checkgiohanstatus', function name(req, res, next) {
             console.log(err)
           } else {
             var ketqua = result;
-           
+
             ketqua.push('cohieuluc');
 
             res.send(ketqua)
@@ -493,7 +507,7 @@ router.use('/hienthibieudo', function name(req, res, next) {
             console.log(err)
           } else {
             var ketqua = result;
-         
+
             ketqua.push('khonghieuluc');
 
             res.send(ketqua)
@@ -507,7 +521,7 @@ router.use('/hienthibieudo', function name(req, res, next) {
             console.log(err)
           } else {
             var ketqua = result;
-           
+
             ketqua.push('cohieuluc');
 
             res.send(ketqua)
@@ -523,41 +537,41 @@ router.use('/hienthibieudo', function name(req, res, next) {
 router.use('/laydulieuthongke', function name(req, res, next) {
   var data = req.body.data;
   console.log(data);
-  if(data.length == 10){
+  if (data.length == 10) {
     var selectdblimit = ` SELECT * FROM iot.CamBien where  thoigian like '${data}%' `;
 
     con.query(selectdblimit, function (err, result, obj) {
       if (err) {
         console.log(err)
       } else {
-       res.send(result);
+        res.send(result);
       }
     })
-  }else if(data.length == 7){
+  } else if (data.length == 7) {
     var selectdblimit = ` SELECT * FROM iot.CamBien where  thoigian like '%${data}%' `;
 
     con.query(selectdblimit, function (err, result, obj) {
       if (err) {
         console.log(err)
       } else {
-       res.send(result);
+        res.send(result);
       }
     })
-  }else if(data.length == 4){
+  } else if (data.length == 4) {
     var selectdblimit = ` SELECT * FROM iot.CamBien where  thoigian like '%${data}%' `;
 
     con.query(selectdblimit, function (err, result, obj) {
       if (err) {
         console.log(err)
       } else {
-       res.send(result);
+        res.send(result);
       }
     })
   }
-  })
-  
+})
+
 /* GET Dang ki page. */
-router.get('/thongke',function(req,res,next){
+router.get('/thongke', function (req, res, next) {
   res.render('thongke');
 });
 /* GET Dang ki page. */
