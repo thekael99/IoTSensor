@@ -32,7 +32,7 @@ module.exports.dangki = function (req, res) {
         name = "";
 
     }
-    res.render('dangki', { title: 'Express', status: '', name: name, role: "" });
+    res.render('dangki', { title: 'Express', status: '', username: name, role: "" });
 }
 
 module.exports.xacthucdangki = function (req, res) {
@@ -41,19 +41,20 @@ module.exports.xacthucdangki = function (req, res) {
     var phone = req.body.phone;
     var role = req.body.role;
   var ngaydk = d;
+  var username = req.cookies.info.username
     var sql = `INSERT INTO user (username, password,phone,role,ngaydk) VALUES ('${usr}','${pass}','${phone}','${role}','${ngaydk}')`;
     con.query(sql, function (err, result, kq) {
-        if (err.errno != 1062 ) {
+        if (err != 1062 ) {
             console.log(err.errno);
-            return res.render('dangki', { title: 'Express', status: 'Co loi khi dang ki' });
+            return res.render('dangki', { title: 'Express', status: 'Co loi khi dang ki' , username:username});
 
 
         } else if(err.errno == 1062){
-            return res.render('dangnhap', { title: 'Express', status: 'Tai khoan da duoc dang ki' });
+            return res.render('dangki', { title: 'Express', status: 'Tai khoan da duoc dang ki' ,username:username});
 
         } 
         else {
-            return res.render('dangnhap', { title: 'Express', status: 'Dang ki thanh cong' });
+            return res.render('dangki', { title: 'Express', status: 'Dang ki thanh cong',username:username });
 
         }
 

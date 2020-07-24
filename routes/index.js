@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json()
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 const axios = require('axios');
+var md5 = require('md5');
 
 //Fetch
 const fetch = require('node-fetch');
@@ -254,6 +255,7 @@ router.get('/detrong', function (req, res, next) {
 });
 /* GET Trang thai motor. */
 router.use('/bieudonhietdo',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
   status = "";
   var obj = {
     "gioihantren": "chuaxacdinh",
@@ -279,7 +281,7 @@ router.use('/bieudonhietdo',auth.authen, function (req, res, next) {
 
           data = result[0];
 
-          res.render('bieudonhietdo', { title: 'Express', data: data, obj: obj, status: status });
+          res.render('bieudonhietdo', { title: 'Express', data: data, obj: obj, status: status, username: usr });
 
         }
       })
@@ -619,14 +621,169 @@ router.use('/setai',auth.authen, function (req, res, next) {
 
 /* GET Dang ki page. */
 router.get('/thongke',auth.authen, function (req, res, next) {
-  res.render('thongke');
+  var usr = req.cookies.info.username;
+
+  res.render('thongke', {username: usr});
+});
+/* GET Lịch sử dùng bơm. */
+router.get('/lichsudungbom',auth.authen, function (req, res, next) {
+  var sql = `SELECT * FROM (SELECT * FROM iot.motor ORDER BY idMotor DESC LIMIT 10) sub ORDER BY idMotor ASC
+  `;
+  var usr = req.cookies.info.username;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('lichsudungbom', {data:result,username: usr});
+
+    }
+  })
+});
+/* GET Quan ly nhan vien page. */
+router.get('/quanlynhanvien',auth.authen, function (req, res, next) {
+  var sql = `select * from user`;
+  var usr = req.cookies.info.username;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('quanlynhanvien', {data:result,username: usr});
+
+    }
+  })
+});
+/* GET Sua vien page. */
+router.post('/suanhanvien',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
+  var username = req.body.username;
+  var sql = `select * from user where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('suanhanvien', {data:result,username: usr});
+
+    }
+  })
+});
+//Qua trang sửa nhân viên
+router.post('/suanhanvien',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
+  var username = req.body.username;
+  var sql = `select * from user where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('suanhanvien', {data:result,username: usr});
+
+    }
+  })
+});
+//Xác nhận sửa nhân viên
+router.post('/xacnhansuanhvien',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
+  var username = req.body.username;
+  var phone = req.body.phone;
+  var role = req.body.role;
+console.log(username);
+
+  var sql = `update user set role = '${role}', phone = '${phone}'  where username = '${username}'`;
+console.log(sql);
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.redirect('quanlynhanvien')
+
+    }
+  })
+});
+//Qua trang đỏi mật khẩu nhân viên
+router.post('/doimatkhau',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
+  var username = req.body.username;
+  var password = req.body.password;
+
+  var sql = `select * from user where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('doimatkhaunhanvien', {data:result,username: usr});
+
+    }
+  })
+});
+//Xác nhận đổi mật khẩu nhân viên
+router.post('/xacnhandoimatkhau',auth.authen, function (req, res, next) {
+  var usr = req.cookies.info.username;
+  var username = req.body.username;
+  var password = md5(req.body.password);
+
+  var sql = `update user set  password = '${password}'  where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+
+      res.redirect('quanlynhanvien')
+
+    }
+  })
+});
+//Qua trang đỏi mật khẩu user
+router.get('/doimatkhauuser',auth.authen, function (req, res, next) {
+  var username = req.cookies.info.username;
+
+  var sql = `select * from user where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.render('doimatkhaunhanvienuser', {data:result,username: username});
+
+    }
+  })
+});
+//Xác nhận đổi mật khẩu user
+router.post('/xacnhandoimatkhauuser',auth.authen, function (req, res, next) {
+  var username = req.cookies.info.username;
+  var password = md5(req.body.password);
+
+  var sql = `update user set  password = '${password}'  where username = '${username}'`;
+
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+
+      res.redirect('doimatkhauuser')
+
+    }
+  })
 });
 /* GET Dang ki page. */
-router.get('/dangki', controller.dangki);
+router.get('/dangki',auth.authen ,controller.dangki);
 /* POST home page. */
 router.post('/dangki', controller.xacthucdangki);
 //Login
 router.get('/dangnhap', controller.dangnhap);
 //Xac thuc dang nhap
 router.post('/xacthucdangnhap', auth.xacthucdangnhap);
+router.use('/dangxuat',  function (req, res, next) {
+ 
+    //    res.cookie('info',{'username':usr, 'password':pass});
+
+    res.cookie('info', { expires: Date.now() });
+    res.redirect('/');
+
+});
 module.exports = router;

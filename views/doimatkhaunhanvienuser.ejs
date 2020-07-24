@@ -6,7 +6,7 @@
   <style>
 
   </style>
-  <title>Đăng kí</title>
+  <title>Đổi mật khẩu nhân viên</title>
 
 </head>
 
@@ -37,28 +37,22 @@
           <div class="container-fluid">
 
             <!-- Page Heading -->
-            <h1 class="h3 mb-2 text-gray-800" style="text-align: center;">Trang đăng kí nhân viên</h1>
+            <h1 class="h3 mb-2 text-gray-800" style="text-align: center;">Đổi mật khẩu nhân viên</h1>
 
 
             <!-- Content Row -->
             
-            <form method="POST" action="/dangki">
+            <form method="POST" action="/xacnhandoimatkhauuser">
               <div class="form-group">
-                <label for="">User name</label>
-                <input type="text" name="usr" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter usr">
-                <label for="">Password</label>
-                <input type="password" name="pass" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter pass">
-                <label for="">Phone</label>
-                <input type="number" name="phone" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter pass">
-                <label for="">Role</label>
-                  <select class="form-control" name="role" id="sel1">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    
-                  </select>
+                <label for="">User name: <%= data[0].username %></label>
+                <input value="<%= data[0].username %>" type="hidden" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter usr">
+               <br>
+                <label for="">Mật khẩu mới</label>
+                <input  type="number" name="password" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter pass">
+               
               </div>
              
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="submit" class="btn btn-primary">Xác nhận</button>
             </form>
            
             <!-- /.container-fluid -->

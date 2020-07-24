@@ -26,14 +26,17 @@
           <a class="navbar-brand" href="/">Smart farm</a>
         </div>
         <ul class="nav navbar-nav " style="background-color: #e3f2fd;"  >
-          <% if (data) { %>
+          <% if (data.username) { %>
           <li><a href="/bieudonhietdo">Trang quản lý khu vườn</a></li>
   
           <% } else { %>
             <li><a href="/dangnhap">Đăng nhập</a></li>
 
             <% } %>
-
+            <% if (data.role == 'admin') { %>
+              <li><a href="/quanlynhanvien">Trang quản người dùng</a></li>
+      
+              <% }  %>
         </ul>
       </div>
     </div>
