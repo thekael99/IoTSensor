@@ -55,19 +55,21 @@ module.exports.authen = function (req, res, next) {
     } else if (info.username) {
         var username = info.username
         var password = info.password;
-        console.log("USR la "+username + " pas la "+ password);
         
-        var sql= `SELECT * FROM user where username = '${usr}' `;
+        var sql= `SELECT * FROM user where username = '${username}' `;
+        con.query(sql, function (err, result, kq) {
+            if (username == result[0].username && password == result[0].password) {
+                next();
+    
+            }
+            else {
+    
+                res.redirect("/dangnhap")
+            }
 
+        })
 
-        if (username == find.username && password == find.password) {
-            next();
-
-        }
-        else {
-
-            res.redirect("/dangnhap")
-        }
+       
     } 
     else { res.redirect("/dangnhap") }
 }

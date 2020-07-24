@@ -185,17 +185,13 @@ client.on('connect', () => {
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  var select = `SELECT * FROM CamBien `;
-  con.query(select, function (err, result, fields) {
-    if (err) throw err;
-    var data = [];
-    var label = [];
-    result.forEach(element => {
-      data.push(element.nhietdo);
-      label.push(`'${element.device}'`);
-    });
-    res.render('index', { title: 'Express', label: label, data: data });
-  });
+  
+  var info = req.cookies.info;
+  if(!info){
+    info = "" 
+  }
+    res.render('index', { title: 'Express',  data: info });
+  
 });
 /* API data nhiet do. */
 router.get('/apinhietdo', function (req, res, next) {
