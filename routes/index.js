@@ -20,7 +20,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "30041999",
+  password: "admin123",
   port: "3306",
   database: "iot"
 });
@@ -67,8 +67,12 @@ function readFile() {
   });
   return obj;
 }
-arg = readFile()
 
+arg = readFile()
+//Checklogin
+var auth = require('../controller/auth.middleware');
+
+//Nhận dữ liệu
 client.on('message', (topicSensor, message) => {
   message = JSON.parse(message)[0];
 
@@ -90,12 +94,18 @@ client.on('message', (topicSensor, message) => {
         var client = mqtt.connect(ip)
         var topic = 'Topic/Speaker'
         // var message = 'Hello tempt! 1'
-        useAI = true;
+        useAI = await axios.get('http://localhost:3000/useai');
+
+        useAI = useAI.data[0].trangthai;
+
+        // Kiểm tra trong db xem có sử dụng Ai ko
         if (useAI == false)
           cuongdo = limit.data[0].value;
-        else
-          cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
-
+        else {
+          // cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
+          cuongdo = 99;
+        }
+        console.log(cuongdo);
         var message = [{ "device_id": "Speaker", "values": ["1", `"${cuongdo}"`] }]
         var mess = JSON.stringify(message);
         client.on('connect', () => {
@@ -247,7 +257,7 @@ router.get('/detrong', function (req, res, next) {
   });
 });
 /* GET Trang thai motor. */
-router.use('/bieudonhietdo', function (req, res, next) {
+router.use('/bieudonhietdo',auth.authen, function (req, res, next) {
   status = "";
   var obj = {
     "gioihantren": "chuaxacdinh",
@@ -293,7 +303,7 @@ router.get('/apimotor', function (req, res, next) {
   });
 });
 /* Tắt motor*/
-router.use('/tatbom', function (req, res, next) {
+router.use('/tatbom',auth.authen, function (req, res, next) {
   var username = req.cookies.info.username;
   // MQTT publisher
   var client = mqtt.connect(ip)
@@ -329,7 +339,7 @@ router.use('/tatbom', function (req, res, next) {
 
 });
 /* Mở motor*/
-router.use('/batbom', function (req, res, next) {
+router.use('/batbom',auth.authen, function (req, res, next) {
 
   var cuongdo = Number.parseInt(req.body.cuongdo);
   if (cuongdo != 0) {
@@ -373,14 +383,15 @@ router.use('/batbom', function (req, res, next) {
 });
 
 /* POSt giá trị giới hạn hiện tại*/
-router.use('/getlimit', function (req, res, next) {
+router.use('/getlimit',auth.authen, async function (req, res, next) {
   var up = req.body.up;
   var down = req.body.down;
   var cuongdo = req.body.cuongdo;
-
   var status;
   var username = req.cookies.info.username;
   var data = [];
+  var useAI = await axios.get('http://localhost:3000/useai');
+  useAI = useAI.data[0].trangthai;
   if (up - 2 >= down) {
 
     //lay gioi han nhiet do
@@ -404,8 +415,14 @@ router.use('/getlimit', function (req, res, next) {
               if (err) {
                 console.log(err);
               } else {
-                status = 'success';
-                res.send(status);
+                if(useAI == 0 ){
+                  status = 'success';
+
+                } else {
+                  status = 'aion';
+
+                }
+                return res.send(status);
 
               }
             })
@@ -441,7 +458,7 @@ router.use('/getlimit', function (req, res, next) {
 
             status = 'wrongnumber';
 
-            res.send(status);
+            return res.send(status);
 
           }
         })
@@ -454,7 +471,56 @@ router.use('/getlimit', function (req, res, next) {
 
 })
 /* Lấy giới hạn hiện tại. */
-router.use('/checkgiohanstatus', function name(req, res, next) {
+router.use('/checkgiohanstatus',auth.authen, async function name(req, res, next) {
+  var useAI = await axios.get('http://localhost:3000/useai');
+  useAI = useAI.data[0].trangthai;
+
+ 
+    var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
+  con.query(selectdblimit, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      if ((result[0].gioihantren == 999) && (result[0].gioihanduoi == -999)) {
+        var selectdblimit = ` SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo where  gioihantren != 999 and gioihanduoi != 999) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+
+            ketqua.push('khonghieuluc');
+
+            res.send(ketqua)
+
+          }
+        })
+      } else {
+        var selectdblimit = `SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
+        con.query(selectdblimit, function (err, result, obj) {
+          if (err) {
+            console.log(err)
+          } else {
+            var ketqua = result;
+            if (useAI == 0) {
+              ketqua.push('cohieuluc');
+
+            } else {
+              ketqua.push('khonghieuluc');
+
+            }
+
+            res.send(ketqua)
+
+          }
+        })
+
+      }
+    }
+  })
+});
+/* Lấy giới hạn hiện tại. */
+router.use('/hienthibieudo',auth.authen, function name(req, res, next) {
   var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
   con.query(selectdblimit, function (err, result, obj) {
     if (err) {
@@ -494,47 +560,7 @@ router.use('/checkgiohanstatus', function name(req, res, next) {
   })
 });
 /* Lấy giới hạn hiện tại. */
-router.use('/hienthibieudo', function name(req, res, next) {
-  var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
-  con.query(selectdblimit, function (err, result, obj) {
-    if (err) {
-      console.log(err)
-    } else {
-      if ((result[0].gioihantren == 999) && (result[0].gioihanduoi == -999)) {
-        var selectdblimit = ` SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo where  gioihantren != 999 and gioihanduoi != 999) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
-        con.query(selectdblimit, function (err, result, obj) {
-          if (err) {
-            console.log(err)
-          } else {
-            var ketqua = result;
-
-            ketqua.push('khonghieuluc');
-
-            res.send(ketqua)
-
-          }
-        })
-      } else {
-        var selectdblimit = `SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ; `;
-        con.query(selectdblimit, function (err, result, obj) {
-          if (err) {
-            console.log(err)
-          } else {
-            var ketqua = result;
-
-            ketqua.push('cohieuluc');
-
-            res.send(ketqua)
-
-          }
-        })
-
-      }
-    }
-  })
-});
-/* Lấy giới hạn hiện tại. */
-router.use('/laydulieuthongke', function name(req, res, next) {
+router.use('/laydulieuthongke',auth.authen, function name(req, res, next) {
   var data = req.body.data;
   console.log(data);
   if (data.length == 10) {
@@ -569,9 +595,34 @@ router.use('/laydulieuthongke', function name(req, res, next) {
     })
   }
 })
+/* Lấy trạng thái ai hiện tại */
+router.use('/useai', function (req, res, next) {
+  var sql = 'select * from iot.sudungai where id = (select max(id) from iot.sudungai)';
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.send(result);
+    }
+  })
+})
+/* Lấy giới hạn hiện tại. */
+router.use('/setai',auth.authen, function (req, res, next) {
+  var status = req.body.status;
+  var username = req.cookies.info.username;
+  var sql = `insert into  iot.sudungai (username, trangthai, daytime) values ('${username}', ${status}, now())`;
+  con.query(sql, function (err, result, obj) {
+    if (err) {
+      console.log(err)
+    } else {
+      res.send(status);
+
+    }
+  })
+})
 
 /* GET Dang ki page. */
-router.get('/thongke', function (req, res, next) {
+router.get('/thongke',auth.authen, function (req, res, next) {
   res.render('thongke');
 });
 /* GET Dang ki page. */

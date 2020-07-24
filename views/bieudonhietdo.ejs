@@ -35,7 +35,7 @@
 
     .contentpump {
       position: absolute;
-      transform: translate(13%, 26%) !important;
+      transform: translate(3%, 26%) !important;
     }
 
     /* On-off motor */
@@ -128,7 +128,80 @@
     .on .toggle:after {
       color: #fff;
     }
+
+    /* BUTTON 5 */
+
+
+    .five .button-wrap {
+      width: 120px;
+      margin: 40px auto 0;
+      cursor: pointer;
+    }
+
+    .five .button-bg {
+      width: 100%;
+      height: 100%;
+      background-color: #02BAD2;
+      border-radius: 40px;
+      padding: 3px;
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+
+    .five :hover.button-bg {
+      color: #22dd22;
+    }
+
+    .five .button-active :hover.button-bg {}
+
+    .five .button-switch {
+      position: relative;
+      left: 0px;
+      width: 64px;
+      height: 44px;
+      background-color: #fff;
+      /*border:solid 13px;*/
+      border-radius: 36px;
+      transition: all 0.2s ease;
+    }
+
+    .five .button-active .button-switch {
+      left: 50px;
+    }
+
+    .five .button-in,
+    .five .button-out {
+      position: absolute;
+      transition: all 0.2s ease;
+      padding-top: 15px;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .five .button-in {
+      margin-left: 82px;
+    }
+
+    .five .button-out {
+      margin-left: 12px;
+      color: #dd2222;
+    }
+
+    .five .button-active .button-out {
+      color: #fff;
+    }
+
+    .five .button-active .button-in {
+      color: #22dd22;
+    }
+
+    .five .button-active .button-bg {
+      background-color: #45bfb4;
+    }
   </style>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 </head>
 
 <body>
@@ -189,6 +262,7 @@
                   </div>
                   <!-- Card Body -->
                   <div class="card-body">
+
                     <div class="themgiohannhietdo" style="display:none">
                       <p id="trangthaigioihannhietdo"></p>
                       <form id="formtrangthaigioihannhietdo" action="" method="">
@@ -223,8 +297,23 @@
                           <div id="motor">
 
                           </div>
+                          <!-- //button 5 -->
+                          <div class="five" style="display: none; height: 75px; transform: translateY(-50px);">
+                            <p style="transform: translateY(30px)">AI mode</p>
+                            <div class="button-wrap">
+                              <div class="button-bg">
+                                <div class="button-out">On</div>
+                                <div class="button-in">Off</div>
+                                <div class="button-switch"></div>
+                              </div>
+                            </div>
+                          </div>
 
-                          <form class="" method="post">
+                          <!-- //button 5 -->
+
+
+
+                          <form class="" method="post" id="formchinhcuongdo">
                             <div class="slidecontainer">
                               <p id="cuongdo">Cường độ: <%= data.value %> </p>
                               <input type="range" min="1" max="100" id="giatricuongdo" name="cuongdo"
@@ -235,6 +324,8 @@
                               <div class="col-12">
                                 <div class="btn btn-success " onclick="batBom()" type="">Mở</div>
                                 <div class="btn btn-danger " onclick="tatBom()" type="">Tắt</div>
+                                <div class="btn btn-info" onclick="hienthiformAi()" type="">AI</div>
+
                               </div>
 
                               <div class=" col-12" style="padding-top: 2%;">
@@ -391,6 +482,15 @@
 
                               }, 3000);
 
+                            }else if (result == "aion") {
+                              $("#status").html("Aimode đang được bật");
+
+                              myVar = setTimeout(function name(params) {
+
+                                $("#status").html("");
+
+                              }, 3000);
+
                             } else {
                               $("#status").html("Thiết lập thất bại");
 
@@ -484,21 +584,61 @@
                           }
                         });
                       }
-                      //Gửi giới hạn nhiệt độ 
-                      function tatBom() {
-                        var cuongdo = $('#giatricuongdo').val()
-                        console.log(cuongdo);
+                     
+                      //Hiển thị form ai
+                      function hienthiformAi() {
+
+                        $.ajax({
+                          url: "useai",
+                          type: "post",
+                          success: function (result) {
+                            console.log(result);
+                            if (result[0].trangthai == 1) {
+
+
+                              if ($('.button-wrap').hasClass('button-active') == false) $('.button-wrap').addClass('button-active');
+
+                            } else if (result[0].trangthai == 0) {
+
+                              if ($('.button-wrap').hasClass('button-active') == true) $('.button-wrap').removeClass('button-active');
+
+                            }
+                          }
+                        })
+
+                        $('.contentpump h4').toggle(500)
+                        $('.contentpump #motor').toggle(500)
+                        $('.five').toggle(500);
+                      }
+
+                      $('.button-wrap').on("click", function () {
+                        if ($(this).hasClass('button-active') == true) {
+                          $(this).removeClass('button-active');
+
+                        } else {
+                          $(this).addClass('button-active');
+
+                        }
+                        var data;
+                        if ($('.button-wrap').hasClass('button-active') == true) {
+                          data = { status: 1 };
+                        } else {
+                          data = { status: 0 };
+                        }
                         $.ajax({
                           type: 'post',
-                          url: '/tatbom',
-                          data: { cuongdo: cuongdo },
-                          success: function (result) {
-                            if (result == 'success') {
-                              $('#giatricuongdo').val(0);
+                          url: 'setai',
+                          data: data, success: function name(result) {
+                            if (result == 1) {
+                              $("#status").html("Bật AI thành công");
 
+                              myVar = setTimeout(function name(params) {
 
-                              $('#newcuongdo').html(0);
-                              $("#status").html("Tắt bơm thành công");
+                                $("#status").html("");
+
+                              }, 3000);
+                            } else if( result == 0) {
+                              $("#status").html("Tắt AI thành công");
 
                               myVar = setTimeout(function name(params) {
 
@@ -506,20 +646,18 @@
 
                               }, 3000);
                             } else {
-                              $("#status").html("Tắt bơm thất bại");
+                              $("#status").html("Có lỗi xảy ra");
 
                               myVar = setTimeout(function name(params) {
 
                                 $("#status").html("");
 
                               }, 3000);
-
                             }
-                            return false;
 
                           }
-                        });
-                      }
+                        })
+                      });
                     </script>
                   </div>
                 </div>
