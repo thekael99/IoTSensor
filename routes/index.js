@@ -21,7 +21,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "admin123",
+  password: "30041999",
   port: "3306",
   database: "iot"
 });
@@ -103,8 +103,8 @@ client.on('message', (topicSensor, message) => {
         if (useAI == false)
           cuongdo = limit.data[0].value;
         else {
-          // cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
-          cuongdo = 99;
+          cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
+          // cuongdo = 99;
         }
         console.log(cuongdo);
         var message = [{ "device_id": "Speaker", "values": ["1", `"${cuongdo}"`] }]
@@ -186,13 +186,13 @@ client.on('connect', () => {
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  
+
   var info = req.cookies.info;
-  if(!info){
-    info = "" 
+  if (!info) {
+    info = ""
   }
-    res.render('index', { title: 'Express',  data: info });
-  
+  res.render('index', { title: 'Express', data: info });
+
 });
 /* API data nhiet do. */
 router.get('/apinhietdo', function (req, res, next) {
@@ -254,7 +254,7 @@ router.get('/detrong', function (req, res, next) {
   });
 });
 /* GET Trang thai motor. */
-router.use('/bieudonhietdo',auth.authen, function (req, res, next) {
+router.use('/bieudonhietdo', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   status = "";
   var obj = {
@@ -301,7 +301,7 @@ router.get('/apimotor', function (req, res, next) {
   });
 });
 /* Tắt motor*/
-router.use('/tatbom',auth.authen, function (req, res, next) {
+router.use('/tatbom', auth.authen, function (req, res, next) {
   var username = req.cookies.info.username;
   // MQTT publisher
   var client = mqtt.connect(ip)
@@ -337,7 +337,7 @@ router.use('/tatbom',auth.authen, function (req, res, next) {
 
 });
 /* Mở motor*/
-router.use('/batbom',auth.authen, function (req, res, next) {
+router.use('/batbom', auth.authen, function (req, res, next) {
 
   var cuongdo = Number.parseInt(req.body.cuongdo);
   if (cuongdo != 0) {
@@ -381,7 +381,7 @@ router.use('/batbom',auth.authen, function (req, res, next) {
 });
 
 /* POSt giá trị giới hạn hiện tại*/
-router.use('/getlimit',auth.authen, async function (req, res, next) {
+router.use('/getlimit', auth.authen, async function (req, res, next) {
   var up = req.body.up;
   var down = req.body.down;
   var cuongdo = req.body.cuongdo;
@@ -413,7 +413,7 @@ router.use('/getlimit',auth.authen, async function (req, res, next) {
               if (err) {
                 console.log(err);
               } else {
-                if(useAI == 0 ){
+                if (useAI == 0) {
                   status = 'success';
 
                 } else {
@@ -469,12 +469,12 @@ router.use('/getlimit',auth.authen, async function (req, res, next) {
 
 })
 /* Lấy giới hạn hiện tại. */
-router.use('/checkgiohanstatus',auth.authen, async function name(req, res, next) {
+router.use('/checkgiohanstatus', auth.authen, async function name(req, res, next) {
   var useAI = await axios.get('http://localhost:3000/useai');
   useAI = useAI.data[0].trangthai;
 
- 
-    var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
+
+  var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
   con.query(selectdblimit, function (err, result, obj) {
     if (err) {
       console.log(err)
@@ -518,7 +518,7 @@ router.use('/checkgiohanstatus',auth.authen, async function name(req, res, next)
   })
 });
 /* Lấy giới hạn hiện tại. */
-router.use('/hienthibieudo',auth.authen, function name(req, res, next) {
+router.use('/hienthibieudo', auth.authen, function name(req, res, next) {
   var selectdblimit = ` SELECT * FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) ; `;
   con.query(selectdblimit, function (err, result, obj) {
     if (err) {
@@ -558,7 +558,7 @@ router.use('/hienthibieudo',auth.authen, function name(req, res, next) {
   })
 });
 /* Lấy giới hạn hiện tại. */
-router.use('/laydulieuthongke',auth.authen, function name(req, res, next) {
+router.use('/laydulieuthongke', auth.authen, function name(req, res, next) {
   var data = req.body.data;
   console.log(data);
   if (data.length == 10) {
@@ -605,7 +605,7 @@ router.use('/useai', function (req, res, next) {
   })
 })
 /* Lấy giới hạn hiện tại. */
-router.use('/setai',auth.authen, function (req, res, next) {
+router.use('/setai', auth.authen, function (req, res, next) {
   var status = req.body.status;
   var username = req.cookies.info.username;
   var sql = `insert into  iot.sudungai (username, trangthai, daytime) values ('${username}', ${status}, now())`;
@@ -620,13 +620,13 @@ router.use('/setai',auth.authen, function (req, res, next) {
 })
 
 /* GET Dang ki page. */
-router.get('/thongke',auth.authen, function (req, res, next) {
+router.get('/thongke', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
 
-  res.render('thongke', {username: usr});
+  res.render('thongke', { username: usr });
 });
 /* GET Lịch sử dùng bơm. */
-router.get('/lichsudungbom',auth.authen, function (req, res, next) {
+router.get('/lichsudungbom', auth.authen, function (req, res, next) {
   var sql = `SELECT * FROM (SELECT * FROM iot.motor ORDER BY idMotor DESC LIMIT 10) sub ORDER BY idMotor ASC
   `;
   var usr = req.cookies.info.username;
@@ -635,13 +635,13 @@ router.get('/lichsudungbom',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('lichsudungbom', {data:result,username: usr});
+      res.render('lichsudungbom', { data: result, username: usr });
 
     }
   })
 });
 /* GET Quan ly nhan vien page. */
-router.get('/quanlynhanvien',auth.authen, function (req, res, next) {
+router.get('/quanlynhanvien', auth.authen, function (req, res, next) {
   var sql = `select * from user`;
   var usr = req.cookies.info.username;
 
@@ -649,13 +649,13 @@ router.get('/quanlynhanvien',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('quanlynhanvien', {data:result,username: usr});
+      res.render('quanlynhanvien', { data: result, username: usr });
 
     }
   })
 });
 /* GET Sua vien page. */
-router.post('/suanhanvien',auth.authen, function (req, res, next) {
+router.post('/suanhanvien', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   var username = req.body.username;
   var sql = `select * from user where username = '${username}'`;
@@ -664,13 +664,13 @@ router.post('/suanhanvien',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('suanhanvien', {data:result,username: usr});
+      res.render('suanhanvien', { data: result, username: usr });
 
     }
   })
 });
 //Qua trang sửa nhân viên
-router.post('/suanhanvien',auth.authen, function (req, res, next) {
+router.post('/suanhanvien', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   var username = req.body.username;
   var sql = `select * from user where username = '${username}'`;
@@ -679,21 +679,21 @@ router.post('/suanhanvien',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('suanhanvien', {data:result,username: usr});
+      res.render('suanhanvien', { data: result, username: usr });
 
     }
   })
 });
 //Xác nhận sửa nhân viên
-router.post('/xacnhansuanhvien',auth.authen, function (req, res, next) {
+router.post('/xacnhansuanhvien', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   var username = req.body.username;
   var phone = req.body.phone;
   var role = req.body.role;
-console.log(username);
+  console.log(username);
 
   var sql = `update user set role = '${role}', phone = '${phone}'  where username = '${username}'`;
-console.log(sql);
+  console.log(sql);
   con.query(sql, function (err, result, obj) {
     if (err) {
       console.log(err)
@@ -704,7 +704,7 @@ console.log(sql);
   })
 });
 //Qua trang đỏi mật khẩu nhân viên
-router.post('/doimatkhau',auth.authen, function (req, res, next) {
+router.post('/doimatkhau', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   var username = req.body.username;
   var password = req.body.password;
@@ -715,13 +715,13 @@ router.post('/doimatkhau',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('doimatkhaunhanvien', {data:result,username: usr});
+      res.render('doimatkhaunhanvien', { data: result, username: usr });
 
     }
   })
 });
 //Xác nhận đổi mật khẩu nhân viên
-router.post('/xacnhandoimatkhau',auth.authen, function (req, res, next) {
+router.post('/xacnhandoimatkhau', auth.authen, function (req, res, next) {
   var usr = req.cookies.info.username;
   var username = req.body.username;
   var password = md5(req.body.password);
@@ -739,7 +739,7 @@ router.post('/xacnhandoimatkhau',auth.authen, function (req, res, next) {
   })
 });
 //Qua trang đỏi mật khẩu user
-router.get('/doimatkhauuser',auth.authen, function (req, res, next) {
+router.get('/doimatkhauuser', auth.authen, function (req, res, next) {
   var username = req.cookies.info.username;
 
   var sql = `select * from user where username = '${username}'`;
@@ -748,13 +748,13 @@ router.get('/doimatkhauuser',auth.authen, function (req, res, next) {
     if (err) {
       console.log(err)
     } else {
-      res.render('doimatkhaunhanvienuser', {data:result,username: username});
+      res.render('doimatkhaunhanvienuser', { data: result, username: username });
 
     }
   })
 });
 //Xác nhận đổi mật khẩu user
-router.post('/xacnhandoimatkhauuser',auth.authen, function (req, res, next) {
+router.post('/xacnhandoimatkhauuser', auth.authen, function (req, res, next) {
   var username = req.cookies.info.username;
   var password = md5(req.body.password);
 
@@ -771,19 +771,19 @@ router.post('/xacnhandoimatkhauuser',auth.authen, function (req, res, next) {
   })
 });
 /* GET Dang ki page. */
-router.get('/dangki',auth.authen ,controller.dangki);
+router.get('/dangki', auth.authen, controller.dangki);
 /* POST home page. */
 router.post('/dangki', controller.xacthucdangki);
 //Login
 router.get('/dangnhap', controller.dangnhap);
 //Xac thuc dang nhap
 router.post('/xacthucdangnhap', auth.xacthucdangnhap);
-router.use('/dangxuat',  function (req, res, next) {
- 
-    //    res.cookie('info',{'username':usr, 'password':pass});
+router.use('/dangxuat', function (req, res, next) {
 
-    res.cookie('info', { expires: Date.now() });
-    res.redirect('/');
+  //    res.cookie('info',{'username':usr, 'password':pass});
+
+  res.cookie('info', { expires: Date.now() });
+  res.redirect('/');
 
 });
 module.exports = router;
