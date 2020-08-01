@@ -21,7 +21,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "30041999",
+  password: "admin123",
   port: "3306",
   database: "iot"
 });
@@ -32,7 +32,7 @@ var mqtt = require('mqtt');
 const { log } = require('debug');
 const { json } = require('express');
 const e = require('express');
-ip = 'mqtt://52.188.19.7:1883';
+ip = 'mqtt://52.230.1.253:1883';
 var client = mqtt.connect(ip);
 //mqtt://13.76.250.158:1883
 //mqtt://52.188.19.7:1883
@@ -70,6 +70,7 @@ function readFile() {
 }
 
 arg = readFile()
+// console.log(arg)
 //Checklogin
 var auth = require('../controller/auth.middleware');
 
@@ -89,6 +90,9 @@ client.on('message', (topicSensor, message) => {
       var insert = `INSERT INTO CamBien (device,nhietdo,doam,thoigian) values ('${message.device_id}','${message.values[0]}','${message.values[1]}',now()) `;
       var run = con.query(insert);
       // console.log(message.values[1])
+      console.log(message.values[0])
+      console.log(message.values[1])
+      // console.log(message.values[0] > limit.data[0].gioihantren)
       if (message.values[0] > limit.data[0].gioihantren) {     //So sánh giới hạn
         //On motor
         // MQTT publisher
@@ -98,10 +102,12 @@ client.on('message', (topicSensor, message) => {
         useAI = await axios.get('http://localhost:3000/useai');
 
         useAI = useAI.data[0].trangthai;
-
+        // console.log(useAI)
         // Kiểm tra trong db xem có sử dụng Ai ko
-        if (useAI == false)
+        if (useAI == 0) {
           cuongdo = limit.data[0].value;
+          // console.log(cuongdo)
+        }
         else {
           cuongdo = message.values[0] * arg[0] + message.values[1] * arg[1] + arg[2]
           // cuongdo = 99;
@@ -212,15 +218,13 @@ router.get('/apinhietdo', function (req, res, next) {
 router.get('/apigioihannhietdo', function (req, res, next) {
   // var select = `SELECT * FROM CamBien where idCamBien `;
 
-  var select = `
-  SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ;`
+  var select = `SELECT  Gioihannhietdo.id, Gioihannhietdo.gioihantren, Gioihannhietdo.gioihanduoi, Gioihannhietdo.timecreate, Gioihannhietdo.username,giatribomkhigioihannhietdo.value   FROM iot.Gioihannhietdo inner join giatribomkhigioihannhietdo  on Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo) and giatribomkhigioihannhietdo.idgioihannhietdo = Gioihannhietdo.id ;`
   con.query(select, function (err, result, fields) {
     if (err) throw err;
     if (result[0]) {
       res.send(result)
     } else {
-      var select = `
-      SELECT  *   FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo)  ;`
+      var select = `SELECT  *   FROM iot.Gioihannhietdo where Gioihannhietdo.id = (select max(id) from iot.Gioihannhietdo)  ;`
       con.query(select, function (err, result, fields) {
         if (err) throw err; res.send(result)
         // console.log(result)
