@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 np.random.seed(11)
-N = 10 
+N = 5000 
 x0 = np.random.uniform(15, 50, N)
 x1 = np.random.uniform(30, 70, N)
 delta = np.random.uniform(-5, 5, N)

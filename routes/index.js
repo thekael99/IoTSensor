@@ -21,7 +21,7 @@ var d = new Date();
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "30041999",
+  password: "admin123",
   port: "3306",
   database: "iot"
 });
@@ -32,12 +32,12 @@ var mqtt = require('mqtt');
 const { log } = require('debug');
 const { json } = require('express');
 const e = require('express');
-ip = 'mqtt://52.188.19.7:1883';
+ip = 'mqtt://52.230.1.253:1883';
 var client = mqtt.connect(ip);
 //mqtt://13.76.250.158:1883
 //mqtt://52.188.19.7:1883
 //sv truong
-//mqtt://52.187.125.59:1883
+//mqtt://52.230.1.253:1883
 var mess;
 //Sub sensor start
 var topicSensor = 'Topic/TempHumi';
